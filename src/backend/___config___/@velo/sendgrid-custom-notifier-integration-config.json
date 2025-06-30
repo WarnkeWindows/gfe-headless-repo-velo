@@ -1,0 +1,85 @@
+{
+    "site": {
+
+        "verifiedSenderEmail": "from@example.com",
+
+        "recipientEmails": ["to@example.com"],
+
+        "events": {
+            "wixBilling_onInvoiceCreated": false,
+            "wixBilling_onInvoicePaid": false,
+            "wixCrm_onContactCreated": false,
+            "wixCrm_onFormSubmit": false,
+            "wixBookings_onBookingCanceled": false,
+            "wixBookings_onBookingRequestCreated": false,
+            "wixEvents_onEventCreated": false,
+            "wixEvents_onRsvpCreated": false,
+            "wixForum_onCommentReported": false,
+            "wixForum_onPostReported": false,
+            "wixMarketing_onCouponApplied": false,
+            "wixMediaManager_onFileUploaded": false,
+            "wixStores_onCartCreated": false,
+            "wixStores_onNewOrder": false
+        },
+
+        "templates": {
+            "wixBilling_onInvoiceCreated": {
+                "subject": "[Custom Notifier] A new invoice was created",
+                "body": "<h3>A new wixBilling_onInvoiceCreated event was fired on your Wix site!</h3><strong>Event Details:</strong><br>invoice title: ${title} <br>customer: ${customer.fullName} <br>customer's email: ${customer.email} <br>issue date: ${dates.issueDate} <br>total: ${totals.total} <br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixBilling_onInvoicePaid": {
+                "subject": "[Custom Notifier] A new invoice was paid",
+                "body": "<h3>A new wixBilling_onInvoicePaid event was fired on your Wix site!</h3><strong>Event Details:</strong><br>invoice title: ${title} <br>customer: ${customer.fullName} <br>customer's email: ${customer.email} <br>issue date: ${dates.issueDate} <br>total: ${totals.total} <br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixCrm_onContactCreated": {
+                "subject": "[Custom Notifier] A new contact was created",
+                "body": "<h3>A new wixCrm_onContactCreated event was fired on your Wix site!</h3><strong>Event Details:</strong><br>contact name: ${entity.info.name.first} ${entity.info.name.last} <br>source: ${source} <br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixCrm_onFormSubmit": {
+                "subject": "[Custom Notifier] A form was submitted",
+                "body": "<h3>A new wixCrm_onFormSubmit event was fired on your Wix site!</h3><strong>Event Details:</strong><br>form name: ${formName} <br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixBookings_onBookingCanceled": {
+                "subject": "[Custom Notifier] A booking was cancled",
+                "body": "<h3>A new wixBookings_onBookingCanceled event was fired on your Wix site!</h3><strong>Event Details:</strong><br>booking id: ${booking._id} <br>trigger: ${trigger} <br>title: ${booking.bookedEntity.title} <br>contact email: ${booking.formInfo.contactDetails.email} <br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixBookings_onBookingRequestCreated": {
+                "subject": "[Custom Notifier] A booking request was created",
+                "body": "<h3>A new wixBookings_onBookingRequestCreated event was fired on your Wix site!</h3><strong>Event Details:</strong><br>booking id: ${booking._id} <br>trigger: ${trigger} <br>title: ${booking.bookedEntity.title} <br>contact email: ${booking.formInfo.contactDetails.email} <br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixEvents_onEventCreated": {
+                "subject": "[Custom Notifier] A new event created",
+                "body": "<h3>A new wixEvents_onEventCreated event was fired on your Wix site!</h3><strong>Event Details:</strong><br>event id: ${eventId} <br>event title: ${title} <br>location: ${location.name} <br>start date: ${scheduleConfig.startDate} <br>end date: ${scheduleConfig.endDate} <br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixEvents_onRsvpCreated": {
+                "subject": "[Custom Notifier] A new event RSVP was created",
+                "body": "<h3>A new wixEvents_onRsvpCreated event was fired on your Wix site!</h3><strong>Event Details:</strong><br>event id: ${eventId} <br>first name: ${firstName} <br>last name: ${lastName} <br>email: ${email} <br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixForum_onCommentReported": {
+                "subject": "[Custom Notifier] A forum's comment was reported",
+                "body": "<h3>A new wixForum_onCommentReported event was fired on your Wix site!</h3><br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixForum_onPostReported": {
+                "subject": "[Custom Notifier] A forum's post was reported",
+                "body": "<h3>A new wixForum_onPostReported event was fired on your Wix site!</h3><br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixMarketing_onCouponApplied": {
+                "subject": "[Custom Notifier] A coupon was applied",
+                "body": "<h3>A new wixMarketing_onCouponApplied event was fired on your Wix site!</h3><strong>Event Details:</strong><br>coupon id: ${data.coupon._id} <br>coupon name: ${data.coupon.name} <br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixMediaManager_onFileUploaded": {
+                "subject": "[Custom Notifier] A new file was uploaded",
+                "body": "<h3>A new wixMediaManager_onFileUploaded event was fired on your Wix site!</h3><strong>Event Details:</strong><br>file media type: ${fileInfo.mediaType} <br>original file name: ${fileInfo.originalFileName} <br>size (bytes): ${fileInfo.sizeInBytes} <br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixStores_onCartCreated": {
+                "subject": "[Custom Notifier] A new cart was created",
+                "body": "<h3>A new wixStores_onCartCreated event was fired on your Wix site!</h3><strong>Event Details:</strong><br>buyer name: ${buyerInfo.firstName} ${buyerInfo.lastName} <br>buyer email: ${buyerInfo.email} <br>total: ${totals.total} <br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            },
+            "wixStores_onNewOrder": {
+                "subject": "[Custom Notifier] A new order was placed",
+                "body": "<h3>A new wixStores_onNewOrder event was fired on your Wix site!</h3><strong>Event Details:</strong><br>buyer name: ${buyerInfo.firstName} ${buyerInfo.lastName} <br>buyer email: ${buyerInfo.email} <br>total: ${totals.total} <br><br><font color='grey'>You can control notification settings for future events by going to your Wix website's Editor -> Packages -> @velo/sendgrid-custom-notification-integration</font>"
+            }
+        }
+    
+    }
+}

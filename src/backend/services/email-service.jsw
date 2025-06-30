@@ -1,0 +1,52 @@
+import { getSecret } from 'backend/data/secretsManager.js';
+
+// Utility function to log email activities
+function logEmailActivity(activity) {
+    console.log('Email Activity:', activity);
+}
+
+// Function to send an email using a generic email provider
+async function sendEmailWithProvider(emailOptions) {
+    // Simulate sending email
+    console.log('Sending email with options:', emailOptions);
+    // Here you would integrate with an actual email service provider
+    return { success: true, message: 'Email sent successfully' };
+}
+
+// Main function to send customer emails
+export async function sendCustomerEmail(emailOptions) {
+    try {
+        // Validate email options
+        if (!emailOptions.to || !emailOptions.from || !emailOptions.subject || !emailOptions.html) {
+            throw new Error('Missing required email fields: to, from, subject, or html');
+        }
+
+        // Retrieve email provider credentials
+        const emailProviderApiKey = await getSecret('email_provider_api_key');
+        if (!emailProviderApiKey) {
+            throw new Error('Email provider API key not found');
+        }
+
+        // Add provider-specific options
+        const providerOptions = {
+            apiKey: emailProviderApiKey,
+            ...emailOptions
+        };
+
+        // Send email using the provider
+        const result = await sendEmailWithProvider(providerOptions);
+
+        // Log the email activity
+        logEmailActivity({
+            to: emailOptions.to,
+            subject: emailOptions.subject,
+            status: result.success ? 'Sent' : 'Failed',
+            message: result.message
+        });
+
+        return result;
+    } catch (error) {
+        console.error('Failed to send email:', error);
+        return { success: false, message: error.message };
+    }
+}

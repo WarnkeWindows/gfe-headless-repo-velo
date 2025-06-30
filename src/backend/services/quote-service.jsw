@@ -1,0 +1,1436 @@
+/**
+ * Complete Wix Data Service - All Collections Integration
+ * Good Faith Exteriors - Comprehensive Data Management
+ * backend/core/wixDataService.web.js
+ * 
+ * Integrates with all 17 Wix Data Collections as defined in CSV files
+ * Provides CRUD operations, search, validation, and analytics
+ */
+
+import wixData from 'wix-data';
+
+// =====================================================================
+// COLLECTION MAPPINGS - Exactly matching CSV file names
+// =====================================================================
+const COLLECTIONS = {
+    // AI & Analysis Collections
+    aiWindowMeasureService: 'AIWindowMeasureService',
+    analytics: 'Analytics',
+    
+    // Product & Pricing Collections
+    baseUICalculator: 'BaseUICalculator',
+    materials: 'Materials',
+    windowTypes: 'WindowTypes',
+    windowBrands: 'WindowBrands',
+    windowOptions: 'WindowOptions',
+    
+    // Customer & Business Collections
+    customers: 'Customers',
+    quoteItems: 'QuoteItems',
+    projects: 'Projects',
+    bookingsAppointments: 'BookingsAppointments',
+    
+    // Business Operations Collections
+    competitorQuote: 'CompetitorQuote',
+    emailSchedule: 'EmailSchedule',
+    referrals: 'Referrals',
+    scheduledAppointments: 'ScheduledAppointments',
+    trainingCertificates: 'TrainingCertificates',
+    
+    // System Configuration
+    configuration: 'Configuration'
+};
+
+// =====================================================================
+// CORE DATA VALIDATION & SANITIZATION
+// =====================================================================
+
+/**
+ * Validates and sanitizes data based on collection schema
+ */
+function validateAndSanitizeData(collection, data) {
+    const sanitized = { ...data };
+    
+    // Remove null/undefined values
+    Object.keys(sanitized).forEach(key => {
+        if (sanitized[key] === null || sanitized[key] === undefined) {
+            delete sanitized[key];
+        }
+    });
+    
+    // Collection-specific validation
+    switch (collection) {
+        case 'customers':
+            if (sanitized.customerEmail) {
+                sanitized.customerEmail = sanitized.customerEmail.toLowerCase().trim();
+            }
+            break;
+            
+        case 'materials':
+        case 'windowTypes':
+        case 'windowBrands':
+            if (sanitized.materialMultiplier || sanitized.typeMultiplier || sanitized.priceMultiplier) {
+                const multiplier = sanitized.materialMultiplier || sanitized.typeMultiplier || sanitized.priceMultiplier;
+                sanitized[Object.keys(sanitized).find(key => key.includes('ultiplier'))] = Math.max(0.1, parseFloat(multiplier) || 1.0);
+            }
+            break;
+            
+        case 'analytics':
+            sanitized.timestamp = sanitized.timestamp || new Date().toISOString();
+            if (typeof sanitized.eventProperties === 'object') {
+                sanitized.eventProperties = JSON.stringify(sanitized.eventProperties);
+            }
+            break;
+    }
+    
+    return sanitized;
+}
+
+// =====================================================================
+// AI WINDOW MEASURE SERVICE - AIWindowMeasureService.csv
+// =====================================================================
+
+/**
+ * Store AI window measurement analysis results
+ */
+export async function storeAIAnalysis(analysisData) {
+    try {
+        const {
+            sessionName = '',
+            userEmail = '',
+            userPhone = '',
+            projectType = 'Window Replacement',
+            sessionNotes = '',
+            windowImage = '',
+            measuredWidth = '',
+            measuredHeight = '',
+            confidencePercent = '',
+            detectedType = '',
+            aiAnalysisData = {},
+            processingMetadata = {}
+        } = analysisData;
+        
+        const analysis = validateAndSanitizeData('aiWindowMeasureService', {
+            sessionName,
+            userEmail,
+            userPhone,
+            projectType,
+            sessionNotes,
+            windowImage,
+            measuredWidth: measuredWidth.toString(),
+            measuredHeight: measuredHeight.toString(),
+            confidencePercent: confidencePercent.toString(),
+            detectedType,
+            aiAnalysisData: JSON.stringify(aiAnalysisData),
+            processingMetadata: JSON.stringify(processingMetadata)
+        });
+        
+        const result = await wixData.insert(COLLECTIONS.aiWindowMeasureService, analysis);
+        
+        return {
+            success: true,
+            analysis: result,
+            id: result._id
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to store AI analysis:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Get AI analysis by session
+ */
+export async function getAIAnalysisBySession(sessionName) {
+    try {
+        const results = await wixData.query(COLLECTIONS.aiWindowMeasureService)
+            .eq('sessionName', sessionName)
+            .descending('_createdDate')
+            .find();
+            
+        return {
+            success: true,
+            analyses: results.items,
+            totalCount: results.totalCount
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to get AI analysis:', error);
+        return {
+            success: false,
+            error: error.message,
+            analyses: []
+        };
+    }
+}
+
+// =====================================================================
+// ANALYTICS SERVICE - Analytics.csv
+// =====================================================================
+
+/**
+ * Store analytics event
+ */
+export async function storeAnalyticsEvent(eventData) {
+    try {
+        const {
+            event = 'unknown_event',
+            page = 'unknown_page',
+            timestamp = new Date().toISOString(),
+            eventProperties = {},
+            sessionId = '',
+            userId = 'anonymous',
+            userAgent = '',
+            pageURL = '',
+            referrer = '',
+            leadId = '',
+            quoteId = '',
+            eventValue = '',
+            duration = '',
+            marketingData = {},
+            deviceType = 'unknown',
+            errorMessage = ''
+        } = eventData;
+        
+        const analytics = validateAndSanitizeData('analytics', {
+            event,
+            page,
+            timestamp,
+            eventProperties: JSON.stringify(eventProperties),
+            sessionId,
+            userId,
+            userAgent,
+            pageURL,
+            referrer,
+            leadId,
+            quoteId,
+            eventValue: eventValue.toString(),
+            duration: duration.toString(),
+            marketingData: JSON.stringify(marketingData),
+            deviceType,
+            errorMessage
+        });
+        
+        const result = await wixData.insert(COLLECTIONS.analytics, analytics);
+        
+        return {
+            success: true,
+            analytics: result
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to store analytics event:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Get analytics data with filtering
+ */
+export async function getAnalytics(filters = {}) {
+    try {
+        const { 
+            event, 
+            page, 
+            startDate, 
+            endDate, 
+            userId,
+            limit = 100,
+            skip = 0 
+        } = filters;
+        
+        let query = wixData.query(COLLECTIONS.analytics);
+        
+        if (event) query = query.eq('event', event);
+        if (page) query = query.eq('page', page);
+        if (userId) query = query.eq('userId', userId);
+        if (startDate) query = query.ge('timestamp', startDate);
+        if (endDate) query = query.le('timestamp', endDate);
+        
+        query = query.descending('timestamp').limit(limit).skip(skip);
+        
+        const results = await query.find();
+        
+        return {
+            success: true,
+            analytics: results.items,
+            totalCount: results.totalCount,
+            hasMore: results.hasNext()
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to get analytics:', error);
+        return {
+            success: false,
+            error: error.message,
+            analytics: []
+        };
+    }
+}
+
+// =====================================================================
+// BASE UI CALCULATOR SERVICE - BaseUICalculator.csv
+// =====================================================================
+
+/**
+ * Get pricing calculator configuration
+ */
+export async function getPricingCalculator(calculatorName = 'default') {
+    try {
+        const results = await wixData.query(COLLECTIONS.baseUICalculator)
+            .eq('calculatorName', calculatorName)
+            .find();
+            
+        if (results.items.length === 0) {
+            // Return default pricing structure
+            return {
+                success: true,
+                calculator: {
+                    calculatorName: 'default',
+                    standardWidth: '36',
+                    standardHeight: '48',
+                    uiTotal: '100',
+                    baseUIPrice: '250',
+                    calculationFormula: 'width * height * materialMultiplier * typeMultiplier'
+                }
+            };
+        }
+        
+        return {
+            success: true,
+            calculator: results.items[0]
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to get pricing calculator:', error);
+        return {
+            success: false,
+            error: error.message,
+            calculator: null
+        };
+    }
+}
+
+/**
+ * Update pricing calculator
+ */
+export async function updatePricingCalculator(calculatorData) {
+    try {
+        const {
+            calculatorName = 'default',
+            standardWidth,
+            standardHeight,
+            uiTotal,
+            baseUIPrice,
+            calculationFormula
+        } = calculatorData;
+        
+        const calculator = validateAndSanitizeData('baseUICalculator', {
+            calculatorName,
+            standardWidth: standardWidth?.toString() || '36',
+            standardHeight: standardHeight?.toString() || '48',
+            uiTotal: uiTotal?.toString() || '100',
+            baseUIPrice: baseUIPrice?.toString() || '250',
+            calculationFormula: calculationFormula || 'width * height * materialMultiplier * typeMultiplier'
+        });
+        
+        // Try to find existing calculator
+        const existing = await wixData.query(COLLECTIONS.baseUICalculator)
+            .eq('calculatorName', calculatorName)
+            .find();
+            
+        let result;
+        if (existing.items.length > 0) {
+            result = await wixData.update(COLLECTIONS.baseUICalculator, calculator, existing.items[0]._id);
+        } else {
+            result = await wixData.insert(COLLECTIONS.baseUICalculator, calculator);
+        }
+        
+        return {
+            success: true,
+            calculator: result
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to update pricing calculator:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+// =====================================================================
+// MATERIALS SERVICE - Materials.csv
+// =====================================================================
+
+/**
+ * Get all materials with enhanced data
+ */
+export async function getMaterials(options = {}) {
+    try {
+        const { limit = 100, orderBy = 'orderRank' } = options;
+        
+        let query = wixData.query(COLLECTIONS.materials);
+        
+        if (orderBy) {
+            query = query.ascending(orderBy);
+        }
+        
+        if (limit) {
+            query = query.limit(limit);
+        }
+        
+        const results = await query.find();
+        
+        const enhancedMaterials = results.items.map(material => ({
+            id: material._id,
+            createdDate: material._createdDate,
+            updatedDate: material._updatedDate,
+            owner: material._owner,
+            
+            // Core fields from Materials.csv
+            materialType: material.materialType || material['Material Type'] || '',
+            materialMultiplier: parseFloat(material.materialMultiplier || material['Material Multiplier']) || 1.0,
+            uiBaseAverage: parseFloat(material.uiBaseAverage || material['UI Base Average']) || 0,
+            orderRank: parseInt(material.orderRank || material['Order Rank']) || 999,
+            
+            // Enhanced fields from CSV
+            durabilityRating: material.durabilityRating || material['durability rating'] || 'Good',
+            maintenanceRequirements: material.maintenanceRequirements || 'Standard',
+            warrantyInformation: material.warrantyInformation || 'Manufacturer Warranty',
+            thermalPerformance: material.thermalPerformance || 'Standard',
+            colorOptions: material.colorOptions || 'Standard Colors',
+            materialSamples: material.materialSamples || '',
+            windowTypesCompatibleMaterials: material.windowTypesCompatibleMaterials || material.WindowTypes_compatibleMaterials || ''
+        }));
+        
+        return {
+            success: true,
+            materials: enhancedMaterials,
+            totalCount: results.totalCount
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to get materials:', error);
+        return {
+            success: false,
+            error: error.message,
+            materials: []
+        };
+    }
+}
+
+// =====================================================================
+// WINDOW TYPES SERVICE - WindowTypes.csv
+// =====================================================================
+
+/**
+ * Get all window types with enhanced data
+ */
+export async function getWindowTypes(options = {}) {
+    try {
+        const { limit = 100, orderBy = 'orderRank' } = options;
+        
+        let query = wixData.query(COLLECTIONS.windowTypes);
+        
+        if (orderBy) {
+            query = query.ascending(orderBy);
+        }
+        
+        if (limit) {
+            query = query.limit(limit);
+        }
+        
+        const results = await query.find();
+        
+        const enhancedTypes = results.items.map(type => ({
+            id: type._id,
+            createdDate: type._createdDate,
+            updatedDate: type._updatedDate,
+            owner: type._owner,
+            
+            // Core fields from WindowTypes.csv
+            windowType: type.windowType || type['Window Type'] || '',
+            description: type.description || type.Description || '',
+            typeMultiplier: parseFloat(type.typeMultiplier || type.TypeMultiplier) || 1.0,
+            orderRank: parseInt(type.orderRank || type.OrderRank) || 999,
+            typeImage: type.typeImage || type.TypeImage || '',
+            
+            // Enhanced fields from CSV
+            installationComplexity: type.installationComplexity || 'Standard',
+            energyEfficiencyRating: type.energyEfficiencyRating || 'Standard',
+            compatibleMaterials: type.compatibleMaterials || '',
+            compatibleBrands: type.compatibleBrands || ''
+        }));
+        
+        return {
+            success: true,
+            windowTypes: enhancedTypes,
+            totalCount: results.totalCount
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to get window types:', error);
+        return {
+            success: false,
+            error: error.message,
+            windowTypes: []
+        };
+    }
+}
+
+// =====================================================================
+// WINDOW BRANDS SERVICE - WindowBrands.csv
+// =====================================================================
+
+/**
+ * Get all window brands with enhanced data
+ */
+export async function getWindowBrands(options = {}) {
+    try {
+        const { limit = 100, orderBy = 'orderRank' } = options;
+        
+        let query = wixData.query(COLLECTIONS.windowBrands);
+        
+        if (orderBy) {
+            query = query.ascending(orderBy);
+        }
+        
+        if (limit) {
+            query = query.limit(limit);
+        }
+        
+        const results = await query.find();
+        
+        const enhancedBrands = results.items.map(brand => ({
+            id: brand._id,
+            title: brand.title || brand.Title || '',
+            createdDate: brand._createdDate,
+            updatedDate: brand._updatedDate,
+            owner: brand._owner,
+            
+            // Core fields from WindowBrands.csv
+            windowBrand: brand.windowBrand || brand['Window Brand'] || '',
+            description: brand.description || brand.Description || '',
+            priceMultiplier: parseFloat(brand.priceMultiplier || brand.PriceMultiplier) || 1.0,
+            logoURL: brand.logoURL || brand.LogoURL || '',
+            orderRank: parseInt(brand.orderRank || brand.OrderRank) || 999,
+            
+            // Enhanced fields from CSV
+            qualityRating: brand.qualityRating || 'Good',
+            warrantyYears: parseInt(brand.warrantyYears) || 10,
+            specialtyFeatures: brand.specialtyFeatures || '',
+            manufacturerContact: brand.manufacturerContact || '',
+            certifications: brand.certifications || '',
+            brandDocuments: brand.brandDocuments || '',
+            windowTypesCompatibleBrands: brand.windowTypesCompatibleBrands || brand.WindowTypes_compatibleBrands || ''
+        }));
+        
+        return {
+            success: true,
+            windowBrands: enhancedBrands,
+            totalCount: results.totalCount
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to get window brands:', error);
+        return {
+            success: false,
+            error: error.message,
+            windowBrands: []
+        };
+    }
+}
+
+// =====================================================================
+// WINDOW OPTIONS SERVICE - WindowOptions.csv
+// =====================================================================
+
+/**
+ * Get all window options with enhanced data
+ */
+export async function getWindowOptions(options = {}) {
+    try {
+        const { limit = 100, orderBy = 'orderRank' } = options;
+        
+        let query = wixData.query(COLLECTIONS.windowOptions);
+        
+        if (orderBy) {
+            query = query.ascending(orderBy);
+        }
+        
+        if (limit) {
+            query = query.limit(limit);
+        }
+        
+        const results = await query.find();
+        
+        const enhancedOptions = results.items.map(option => ({
+            id: option._id,
+            title: option.title || option.Title || '',
+            createdDate: option._createdDate,
+            updatedDate: option._updatedDate,
+            owner: option._owner,
+            
+            // Core fields from WindowOptions.csv
+            optionName: option.optionName || option['Option Name'] || '',
+            description: option.description || option.Description || '',
+            optionCost: parseFloat(option.optionCost) || 0,
+            typeMultiplier: parseFloat(option.typeMultiplier || option.TypeMultiplier) || 1.0,
+            orderRank: parseInt(option.orderRank || option.OrderRank) || 999,
+            typeImage: option.typeImage || option.TypeImage || '',
+            
+            // Enhanced fields from CSV
+            energyImpact: option.energyImpact || 'Neutral',
+            compatibilityMatrix: option.compatibilityMatrix || '',
+            optionCategory: option.optionCategory || 'Standard',
+            quoteItemsGlassOptions: option.quoteItemsGlassOptions || option.QuoteItems_glassOptions || ''
+        }));
+        
+        return {
+            success: true,
+            windowOptions: enhancedOptions,
+            totalCount: results.totalCount
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to get window options:', error);
+        return {
+            success: false,
+            error: error.message,
+            windowOptions: []
+        };
+    }
+}
+
+// =====================================================================
+// CUSTOMERS SERVICE - Customers.csv
+// =====================================================================
+
+/**
+ * Create or update customer
+ */
+export async function createOrUpdateCustomer(customerData) {
+    try {
+        const {
+            customerName,
+            customerEmail,
+            customerAddress = '',
+            leadSource = 'website',
+            leadStatus = 'new',
+            claimNumber = '',
+            notes = '',
+            customerDocuments = '',
+            projectHistory = ''
+        } = customerData;
+        
+        if (!customerName || !customerEmail) {
+            throw new Error('Customer name and email are required');
+        }
+        
+        // Check if customer exists
+        const existing = await wixData.query(COLLECTIONS.customers)
+            .eq('customerEmail', customerEmail.toLowerCase())
+            .find();
+            
+        const customer = validateAndSanitizeData('customers', {
+            customerName,
+            customerEmail: customerEmail.toLowerCase(),
+            customerAddress,
+            leadSource,
+            leadStatus,
+            claimNumber,
+            notes,
+            dateCreated: new Date().toISOString(),
+            customerDocuments,
+            projectHistory
+        });
+        
+        let result;
+        if (existing.items.length > 0) {
+            // Update existing customer
+            result = await wixData.update(COLLECTIONS.customers, customer, existing.items[0]._id);
+        } else {
+            // Create new customer
+            result = await wixData.insert(COLLECTIONS.customers, customer);
+        }
+        
+        return {
+            success: true,
+            customer: result,
+            isNew: existing.items.length === 0
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to create/update customer:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Get customer by email
+ */
+export async function getCustomerByEmail(email) {
+    try {
+        const results = await wixData.query(COLLECTIONS.customers)
+            .eq('customerEmail', email.toLowerCase())
+            .find();
+            
+        return {
+            success: true,
+            customer: results.items.length > 0 ? results.items[0] : null,
+            exists: results.items.length > 0
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to get customer by email:', error);
+        return {
+            success: false,
+            error: error.message,
+            customer: null,
+            exists: false
+        };
+    }
+}
+
+// =====================================================================
+// QUOTE ITEMS SERVICE - QuoteItems.csv
+// =====================================================================
+
+/**
+ * Create quote item
+ */
+export async function createQuoteItem(quoteItemData) {
+    try {
+        const {
+            title = '',
+            quoteId = '',
+            itemNumber = '',
+            locationName = '',
+            windowType = '',
+            brand = '',
+            material = '',
+            width = '',
+            height = '',
+            universalInches = '',
+            quantity = '1',
+            unitPrice = '0',
+            totalPrice = '0',
+            laborCost = '0',
+            glassOptions = '',
+            itemNotes = '',
+            uploadedImage = '',
+            aiMeasurements = '',
+            technicalDiagram = ''
+        } = quoteItemData;
+        
+        const quoteItem = validateAndSanitizeData('quoteItems', {
+            title: title || `${windowType} - ${locationName}`,
+            quoteId,
+            itemNumber,
+            locationName,
+            windowType,
+            brand,
+            material,
+            width: width.toString(),
+            height: height.toString(),
+            universalInches: universalInches.toString(),
+            quantity: quantity.toString(),
+            unitPrice: unitPrice.toString(),
+            totalPrice: totalPrice.toString(),
+            laborCost: laborCost.toString(),
+            glassOptions,
+            itemNotes,
+            uploadedImage,
+            aiMeasurements: JSON.stringify(aiMeasurements),
+            technicalDiagram
+        });
+        
+        const result = await wixData.insert(COLLECTIONS.quoteItems, quoteItem);
+        
+        return {
+            success: true,
+            quoteItem: result
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to create quote item:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Get quote items by quote ID
+ */
+export async function getQuoteItems(quoteId) {
+    try {
+        const results = await wixData.query(COLLECTIONS.quoteItems)
+            .eq('quoteId', quoteId)
+            .ascending('itemNumber')
+            .find();
+            
+        return {
+            success: true,
+            quoteItems: results.items,
+            totalCount: results.totalCount
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to get quote items:', error);
+        return {
+            success: false,
+            error: error.message,
+            quoteItems: []
+        };
+    }
+}
+
+// =====================================================================
+// BOOKINGS APPOINTMENTS SERVICE - BookingsAppointments.csv
+// =====================================================================
+
+/**
+ * Create booking appointment
+ */
+export async function createBooking(bookingData) {
+    try {
+        const {
+            customerName = '',
+            email = '',
+            phoneNumber = '',
+            selectedService = 'Window Consultation',
+            preferredDate = '',
+            preferredTime = '',
+            bookingStatus = 'pending',
+            internalNotes = '',
+            serviceImage = '',
+            appointmentAddress = ''
+        } = bookingData;
+        
+        const booking = validateAndSanitizeData('bookingsAppointments', {
+            customerName,
+            email: email.toLowerCase(),
+            phoneNumber,
+            selectedService,
+            preferredDate,
+            preferredTime,
+            bookingStatus,
+            internalNotes,
+            serviceImage,
+            appointmentAddress
+        });
+        
+        const result = await wixData.insert(COLLECTIONS.bookingsAppointments, booking);
+        
+        return {
+            success: true,
+            booking: result
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to create booking:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Get bookings by status
+ */
+export async function getBookingsByStatus(status = 'pending') {
+    try {
+        const results = await wixData.query(COLLECTIONS.bookingsAppointments)
+            .eq('bookingStatus', status)
+            .descending('_createdDate')
+            .find();
+            
+        return {
+            success: true,
+            bookings: results.items,
+            totalCount: results.totalCount
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to get bookings:', error);
+        return {
+            success: false,
+            error: error.message,
+            bookings: []
+        };
+    }
+}
+
+// =====================================================================
+// CONFIGURATION SERVICE - Configuration.csv
+// =====================================================================
+
+/**
+ * Get configuration settings
+ */
+export async function getConfiguration(category = null) {
+    try {
+        let query = wixData.query(COLLECTIONS.configuration)
+            .eq('isActive', 'true'); // String comparison as per CSV
+            
+        if (category) {
+            query = query.eq('configCategory', category);
+        }
+        
+        const results = await query.find();
+        
+        // Convert to key-value pairs
+        const config = {};
+        const configItems = results.items.map(item => {
+            config[item.configKey] = item.configValue;
+            return {
+                id: item._id,
+                createdDate: item._createdDate,
+                updatedDate: item._updatedDate,
+                owner: item._owner,
+                configKey: item.configKey,
+                configValue: item.configValue,
+                configCategory: item.configCategory,
+                configDescription: item.configDescription,
+                isActive: item.isActive,
+                environmentSpecific: item.environmentSpecific,
+                userRolePermissions: item.userRolePermissions,
+                featureFlags: item.featureFlags
+            };
+        });
+        
+        return {
+            success: true,
+            config,
+            items: configItems,
+            totalCount: results.totalCount
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to get configuration:', error);
+        return {
+            success: false,
+            error: error.message,
+            config: {}
+        };
+    }
+}
+
+/**
+ * Update configuration setting
+ */
+export async function updateConfiguration(configKey, configValue, options = {}) {
+    try {
+        const {
+            configCategory = 'general',
+            configDescription = '',
+            isActive = 'true',
+            environmentSpecific = 'false',
+            userRolePermissions = 'admin',
+            featureFlags = ''
+        } = options;
+        
+        // Check if config exists
+        const existing = await wixData.query(COLLECTIONS.configuration)
+            .eq('configKey', configKey)
+            .find();
+            
+        const config = validateAndSanitizeData('configuration', {
+            configKey,
+            configValue,
+            configCategory,
+            configDescription,
+            isActive,
+            environmentSpecific,
+            userRolePermissions,
+            featureFlags
+        });
+        
+        let result;
+        if (existing.items.length > 0) {
+            result = await wixData.update(COLLECTIONS.configuration, config, existing.items[0]._id);
+        } else {
+            result = await wixData.insert(COLLECTIONS.configuration, config);
+        }
+        
+        return {
+            success: true,
+            configuration: result
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to update configuration:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+// =====================================================================
+// PROJECTS SERVICE - Projects.csv
+// =====================================================================
+
+/**
+ * Create project
+ */
+export async function createProject(projectData) {
+    try {
+        const {
+            title = `Project ${Date.now()}`,
+            customersProjectHistory = ''
+        } = projectData;
+        
+        const project = validateAndSanitizeData('projects', {
+            title,
+            customersProjectHistory
+        });
+        
+        const result = await wixData.insert(COLLECTIONS.projects, project);
+        
+        return {
+            success: true,
+            project: result
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to create project:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+// =====================================================================
+// TRAINING CERTIFICATES SERVICE - TrainingCertificates.csv
+// =====================================================================
+
+/**
+ * Create training certificate
+ */
+export async function createTrainingCertificate(certificateData) {
+    try {
+        const {
+            certificateTitle = '',
+            userId = '',
+            moduleId = '',
+            certificateId = '',
+            issuedDate = new Date().toISOString(),
+            validUntil = '',
+            averageScore = '',
+            completionDate = new Date().toISOString(),
+            certificateDocument = ''
+        } = certificateData;
+        
+        const certificate = validateAndSanitizeData('trainingCertificates', {
+            certificateTitle,
+            userId,
+            moduleId,
+            certificateId,
+            issuedDate,
+            validUntil,
+            averageScore: averageScore.toString(),
+            completionDate,
+            certificateDocument
+        });
+        
+        const result = await wixData.insert(COLLECTIONS.trainingCertificates, certificate);
+        
+        return {
+            success: true,
+            certificate: result
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to create training certificate:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+// =====================================================================
+// GENERIC CRUD OPERATIONS
+// =====================================================================
+
+/**
+ * Generic insert function for any collection
+ */
+export async function insertRecord(collectionName, data) {
+    try {
+        if (!COLLECTIONS[collectionName] && !Object.values(COLLECTIONS).includes(collectionName)) {
+            throw new Error(`Unknown collection: ${collectionName}`);
+        }
+        
+        const actualCollectionName = COLLECTIONS[collectionName] || collectionName;
+        const sanitizedData = validateAndSanitizeData(collectionName, data);
+        const result = await wixData.insert(actualCollectionName, sanitizedData);
+        
+        return {
+            success: true,
+            record: result,
+            id: result._id
+        };
+        
+    } catch (error) {
+        console.error(`❌ Failed to insert record into ${collectionName}:`, error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Generic update function for any collection
+ */
+export async function updateRecord(collectionName, recordId, data) {
+    try {
+        if (!COLLECTIONS[collectionName] && !Object.values(COLLECTIONS).includes(collectionName)) {
+            throw new Error(`Unknown collection: ${collectionName}`);
+        }
+        
+        const actualCollectionName = COLLECTIONS[collectionName] || collectionName;
+        const sanitizedData = validateAndSanitizeData(collectionName, data);
+        const result = await wixData.update(actualCollectionName, sanitizedData, recordId);
+        
+        return {
+            success: true,
+            record: result,
+            id: result._id
+        };
+        
+    } catch (error) {
+        console.error(`❌ Failed to update record in ${collectionName}:`, error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Generic get function for any collection
+ */
+export async function getRecord(collectionName, recordId) {
+    try {
+        if (!COLLECTIONS[collectionName] && !Object.values(COLLECTIONS).includes(collectionName)) {
+            throw new Error(`Unknown collection: ${collectionName}`);
+        }
+        
+        const actualCollectionName = COLLECTIONS[collectionName] || collectionName;
+        const result = await wixData.get(actualCollectionName, recordId);
+        
+        return {
+            success: true,
+            record: result
+        };
+        
+    } catch (error) {
+        console.error(`❌ Failed to get record from ${collectionName}:`, error);
+        return {
+            success: false,
+            error: error.message,
+            record: null
+        };
+    }
+}
+
+/**
+ * Generic delete function for any collection
+ */
+export async function deleteRecord(collectionName, recordId) {
+    try {
+        if (!COLLECTIONS[collectionName] && !Object.values(COLLECTIONS).includes(collectionName)) {
+            throw new Error(`Unknown collection: ${collectionName}`);
+        }
+        
+        const actualCollectionName = COLLECTIONS[collectionName] || collectionName;
+        await wixData.remove(actualCollectionName, recordId);
+        
+        return {
+            success: true,
+            deletedId: recordId
+        };
+        
+    } catch (error) {
+        console.error(`❌ Failed to delete record from ${collectionName}:`, error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+// =====================================================================
+// SEARCH & QUERY OPERATIONS
+// =====================================================================
+
+/**
+ * Search across multiple collections - CORRECTED VERSION
+ * File: backend/core/wixDataService.web.js
+ */
+export async function searchAllCollections(searchTerm, collections = ['customers', 'quoteItems'], options = {}) {
+    try {
+        const { limit = 50 } = options;
+        const results = {};
+        
+        for (const collection of collections) {
+            const collectionName = COLLECTIONS[collection];
+            if (!collectionName) continue;
+            
+            try {
+                let query;
+                
+                switch (collection) {
+                    case 'customers': {
+                        const customerQuery1 = wixData.query(collectionName).contains('customerName', searchTerm);
+                        const customerQuery2 = wixData.query(collectionName).contains('customerEmail', searchTerm);
+                        const customerQuery3 = wixData.query(collectionName).contains('customerAddress', searchTerm);
+                        
+                        query = customerQuery1.or(customerQuery2).or(customerQuery3);
+                        break;
+                    }
+                        
+                    case 'quoteItems': {
+                        const quoteQuery1 = wixData.query(collectionName).contains('locationName', searchTerm);
+                        const quoteQuery2 = wixData.query(collectionName).contains('windowType', searchTerm);
+                        const quoteQuery3 = wixData.query(collectionName).contains('brand', searchTerm);
+                        
+                        query = quoteQuery1.or(quoteQuery2).or(quoteQuery3);
+                        break;
+                    }
+                        
+                    case 'aiWindowMeasureService': {
+                        const aiQuery1 = wixData.query(collectionName).contains('userEmail', searchTerm);
+                        const aiQuery2 = wixData.query(collectionName).contains('sessionName', searchTerm);
+                        const aiQuery3 = wixData.query(collectionName).contains('detectedType', searchTerm);
+                        
+                        query = aiQuery1.or(aiQuery2).or(aiQuery3);
+                        break;
+                    }
+                        
+                    case 'materials': {
+                        query = wixData.query(collectionName).contains('materialType', searchTerm);
+                        break;
+                    }
+                        
+                    case 'windowTypes': {
+                        query = wixData.query(collectionName).contains('windowType', searchTerm);
+                        break;
+                    }
+                        
+                    case 'windowBrands': {
+                        query = wixData.query(collectionName).contains('windowBrand', searchTerm);
+                        break;
+                    }
+                        
+                    case 'bookingsAppointments': {
+                        const bookingQuery1 = wixData.query(collectionName).contains('customerName', searchTerm);
+                        const bookingQuery2 = wixData.query(collectionName).contains('email', searchTerm);
+                        
+                        query = bookingQuery1.or(bookingQuery2);
+                        break;
+                    }
+                        
+                    default: {
+                        // Generic search - try title field first, fallback to skip
+                        try {
+                            query = wixData.query(collectionName).contains('title', searchTerm);
+                        } catch {
+                            // Skip collections without searchable fields
+                            continue;
+                        }
+                        break;
+                    }
+                }
+                
+                const searchResults = await query.limit(limit).find();
+                results[collection] = searchResults.items;
+                
+            } catch (collectionError) {
+                console.warn(`⚠️ Search failed for ${collection}:`, collectionError);
+                results[collection] = [];
+            }
+        }
+        
+        return {
+            success: true,
+            results,
+            searchTerm,
+            collectionsSearched: collections
+        };
+        
+    } catch (error) {
+        console.error('❌ Multi-collection search failed:', error);
+        return {
+            success: false,
+            error: error.message,
+            results: {}
+        };
+    }
+}
+
+/**
+ * Bulk operations helper
+ */
+export async function bulkOperation(operation, collection, items, options = {}) {
+    try {
+        const { batchSize = 10 } = options;
+        const collectionName = COLLECTIONS[collection];
+        
+        if (!collectionName) {
+            throw new Error(`Unknown collection: ${collection}`);
+        }
+        
+        const results = [];
+        
+        // Process in batches
+        for (let i = 0; i < items.length; i += batchSize) {
+            const batch = items.slice(i, i + batchSize);
+            const batchPromises = batch.map(item => {
+                const sanitizedItem = validateAndSanitizeData(collection, item);
+                
+                switch (operation) {
+                    case 'insert':
+                        return wixData.insert(collectionName, sanitizedItem);
+                    case 'update':
+                        return wixData.update(collectionName, sanitizedItem);
+                    case 'remove':
+                        return wixData.remove(collectionName, item._id || item.id);
+                    default:
+                        throw new Error(`Unknown operation: ${operation}`);
+                }
+            });
+            
+            const batchResults = await Promise.allSettled(batchPromises);
+            results.push(...batchResults);
+        }
+        
+        const successful = results.filter(r => r.status === 'fulfilled').length;
+        const failed = results.filter(r => r.status === 'rejected').length;
+        
+        return {
+            success: failed === 0,
+            totalProcessed: items.length,
+            successful,
+            failed,
+            results: results.map(r => r.status === 'fulfilled' ? r.value : r.reason)
+        };
+        
+    } catch (error) {
+        console.error('❌ Bulk operation failed:', error);
+        return {
+            success: false,
+            error: error.message,
+            totalProcessed: 0,
+            successful: 0,
+            failed: items.length
+        };
+    }
+}
+
+// =====================================================================
+// SYSTEM UTILITIES
+// =====================================================================
+
+/**
+ * Get collection statistics
+ */
+export async function getCollectionStats() {
+    try {
+        const stats = {};
+        
+        for (const [key, collectionName] of Object.entries(COLLECTIONS)) {
+            try {
+                const query = wixData.query(collectionName);
+                const results = await query.find();
+                
+                stats[key] = {
+                    collectionName,
+                    totalCount: results.totalCount,
+                    itemsReturned: results.items.length,
+                    lastUpdated: results.items.length > 0 ? 
+                        Math.max(...results.items.map(item => 
+                            new Date(item._updatedDate || item._createdDate).getTime()
+                        )) : null,
+                    sampleFields: results.items.length > 0 ? Object.keys(results.items[0]) : []
+                };
+            } catch (error) {
+                stats[key] = {
+                    collectionName,
+                    error: error.message,
+                    totalCount: 0
+                };
+            }
+        }
+        
+        return {
+            success: true,
+            stats,
+            totalCollections: Object.keys(COLLECTIONS).length,
+            timestamp: new Date().toISOString()
+        };
+        
+    } catch (error) {
+        console.error('❌ Failed to get collection stats:', error);
+        return {
+            success: false,
+            error: error.message,
+            stats: {}
+        };
+    }
+}
+
+/**
+ * Health check for data service
+ */
+export async function healthCheck() {
+    try {
+        // Test basic connectivity
+        const testCollection = COLLECTIONS.configuration;
+        const testQuery = await wixData.query(testCollection).limit(1).find();
+        
+        const stats = await getCollectionStats();
+        
+        return {
+            success: true,
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            collections: Object.keys(COLLECTIONS).length,
+            connectivity: testQuery ? 'connected' : 'disconnected',
+            stats: stats.success ? stats.stats : null
+        };
+        
+    } catch (error) {
+        console.error('❌ Data service health check failed:', error);
+        return {
+            success: false,
+            status: 'unhealthy',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        };
+    }
+}
+
+// =====================================================================
+// EXPORT ALL COLLECTIONS CONSTANT
+// =====================================================================
+export { COLLECTIONS };
