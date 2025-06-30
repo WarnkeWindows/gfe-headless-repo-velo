@@ -1,0 +1,132 @@
+{
+  "app": {
+    "name": "Good Faith Exteriors - Headless Blocks App",
+    "version": "2.0.0",
+    "description": "Complete widget suite for Good Faith Exteriors with dark navy blue theme and gold accents",
+    "domain": "goodfaithexteriors.com"
+  },
+  "wix": {
+    "headless": {
+      "client_name": "Grid-Flow Engine",
+      "client_id": "00a645c0-e9d5-474e-8546-4759ca41752a",
+      "account_id": "10d52dd8-ec9b-4453-adbc-6293b99af499",
+      "api_token": "IST.eyJraWQiOiJQb3pIX2FDMiIsImFsZyI6IlJTMjU2In0.eyJkYXRhIjoie1wiaWRcIjpcImIwYTRkNTJmLWFkOGYtNDFlYS05OGFkLTk4MGE0NThjZTU5ZVwiLFwiaWRlbnRpdHlcIjp7XCJ0eXBlXCI6XCJhcHBsaWNhdGlvblwiLFwiaWRcIjpcImM1ZTM1MjA4LTVkYjgtNDU3ZC1hMmY2LWY1NzkyODVhNjk2ZlwifSxcInRlbmFudFwiOntcInR5cGVcIjpcImFjY291bnRcIixcImlkXCI6XCIxMGQ1MmRkOC1lYzliLTQ0NTMtYWRiYy02MjkzYjk5YWY0OTlcIn19IiwiaWF0IjoxNzUxMzAxNDY4fQ.ivykr_yFiqwsfpQ6Q7JRqyWvyEpcVEXAt7hnpYvAjyalXczB3m88kG755eZMppu1WpNRdFY-4HadshoeXEmgsCG2uyH2ofvoM6WOLOaxoYZ5Ryo3ifnycPeP3k_zB9udubemgc2b09m7_iXzsuGVHT0cpncTzoekCojaQlHpnrcPCbW75f3DOFQ9Q43MknC7JXWOojf8vFwcZaICa0OOv-Y_voyR9StNF7q9JR8Vzg6uTVwMS8McQmo9RjZLI40JKbuU--LYPTzHluF42UDm3uTB6YX9CAqb8byZopWfU5qxT2B6MmQBBv2NzL5jVdKqGA7vajxO7C47h02Ur2JTCg",
+      "dashboard_link": "https://manage.wix.com/dashboard/1daf6e42-c7ae-4e56-9a0f-24209afd43c2/setup?referralInfo=sites-dropdown",
+      "meta_site_id": "1daf6e42-c7ae-4e56-9a0f-24209afd43c2"
+    },
+    "blocks_app": {
+      "dashboard_link": "https://manage.wix.com/apps/477baa33-872c-4b41-8f1f-7d5e28a684f2/home?referralInfo=blocks",
+      "account_id": "477baa33-872c-4b41-8f1f-7d5e28a684f2",
+      "app_secret": "c8b358bd-e1e1-437c-a8f5-a2f0fd6399a1",
+      "app_id": "477baa33-872c-4b41-8f1f-7d5e28a684f2",
+      "namespace": "@goodfaithexteriors/grid-flow-engine"
+    }
+  },
+  "theme": {
+    "primary_color": "#1a2332",
+    "secondary_color": "#d4af37",
+    "accent_color": "#c0c0c0",
+    "text_color": "#ffffff",
+    "background_color": "#0f1419",
+    "border_color": "#d4af37",
+    "button_primary": "#d4af37",
+    "button_secondary": "#c0c0c0",
+    "gradient": "linear-gradient(135deg, #1a2332 0%, #0f1419 100%)"
+  },
+  "image_assets": {
+    "logos": {
+      "gfe_logo_with_brands": "https://static.wixstatic.com/media/10d52d_6d032bfecefb4df69e68bf7dc26fbd92~mv2.png",
+      "ai_window_measure_icon": "https://static.wixstatic.com/media/10d52d_1f0bc35da9f64cfaaf3e7bdd0e19e46d~mv2.png",
+      "gfe_logo_square": "https://static.wixstatic.com/media/10d52d_91ba6fdf18634b31b4ebedf5f0f7f8d3~mv2.png",
+      "gfe_logo_landscape": "https://static.wixstatic.com/media/10d52d_651a76065cb8426294f04e1b7483a3a2~mv2.png",
+      "gf_estimator_logo": "https://static.wixstatic.com/media/10d52d_d988707487cd498ab95e653e09f5ca4a~mv2.png",
+      "grid_flow_engine_icon": "https://static.wixstatic.com/media/10d52d_eea1622cce0b4367b734bb51a0d81eb8~mv2.jpg"
+    },
+    "brand_logos": {
+      "marvin": "https://static.wixstatic.com/media/10d52d_7df98cb648bb485d8e2f0922a3da18f4~mv2.jpeg",
+      "andersen": "https://static.wixstatic.com/media/10d52d_19c62f7d131445829ff8fdde2b581b98~mv2.jpeg",
+      "pella": "https://static.wixstatic.com/media/10d52d_739b01217f084e21a41dd8591b98e6b8~mv2.jpeg",
+      "provia": "https://static.wixstatic.com/media/10d52d_bcbbb5675e7b496891f63cb64e37fa07~mv2.png",
+      "windsor": "https://static.wixstatic.com/media/10d52d_da963919e25c46c9bd735ee4bbce0da9~mv2.jpeg",
+      "thermo_tech": "https://static.wixstatic.com/media/10d52d_a333c0355ff14c6cb0ac68755b29b1f3~mv2.jpeg"
+    },
+    "backgrounds": {
+      "luxury_living_room": "https://static.wixstatic.com/media/10d52d_a59424b9d5314e54886b4ba6f091075f~mv2.png",
+      "home_page_background": "https://static.wixstatic.com/media/10d52d_8658ee3d06944967b7897cc2aa1e32de~mv2.png",
+      "section_background": "https://static.wixstatic.com/media/10d52d_5eeff8c1bc7048f494c375abde3aae32~mv2.png",
+      "online_estimator_advert": "https://static.wixstatic.com/media/10d52d_f1b3cb2574fd4f228b23f7a4bdd41d3a~mv2.png"
+    },
+    "window_types": {
+      "awning": "https://static.wixstatic.com/media/10d52d_35742c77270640e7bce240ef7280568c~mv2.png",
+      "casement": "https://static.wixstatic.com/media/10d52d_79a4cd4776a94ba2a958989178a6ee7f~mv2.png",
+      "bay": "https://static.wixstatic.com/media/10d52d_27545cce879743aeb6e85256d4837f97~mv2.png",
+      "slider": "https://static.wixstatic.com/media/10d52d_d4baffa175394b2c88b4f75dfd833eeb~mv2.png",
+      "entry_door": "https://static.wixstatic.com/media/10d52d_bcaf2da6be774a72a562e3dc7527ec90~mv2.png",
+      "single_hung": "https://static.wixstatic.com/media/10d52d_b7c5f1d8d75d4eb7b3d5e049a012527d~mv2.png",
+      "picture": "https://static.wixstatic.com/media/10d52d_12cbfe1efc744559b497c3acbf43fe8f~mv2.png",
+      "double_hung": "https://static.wixstatic.com/media/10d52d_b8bfb21fc4d6460ebce21673473667f5~mv2.png",
+      "french_wood_patio": "https://static.wixstatic.com/media/10d52d_a82cc4c9bc8a423faa37a740b4ca9d61~mv2.png",
+      "sliding_patio": "https://static.wixstatic.com/media/10d52d_8c1bf015415149e6b1cfb8a48aab3cc9~mv2.png",
+      "ai_window_measure": "https://static.wixstatic.com/media/10d52d_75a7fe388bbd430cbb8b880f0f2a4914~mv2.png"
+    }
+  },
+  "widgets": [
+    {
+      "id": "ai-window-estimator",
+      "name": "AI Window Estimator",
+      "description": "AI-powered window estimation with image analysis",
+      "icon": "window",
+      "category": "estimator"
+    },
+    {
+      "id": "good-faith-estimator",
+      "name": "Good Faith Estimator",
+      "description": "Traditional step-by-step window estimation",
+      "icon": "calculator",
+      "category": "estimator"
+    },
+    {
+      "id": "ai-window-measure",
+      "name": "AI Window Measure",
+      "description": "AI-powered window measurement tool",
+      "icon": "ruler",
+      "category": "measurement"
+    },
+    {
+      "id": "product-browser",
+      "name": "Product Browser",
+      "description": "Interactive window product catalog",
+      "icon": "grid",
+      "category": "products"
+    },
+    {
+      "id": "quote-comparison",
+      "name": "Quote Comparison",
+      "description": "Compare multiple quotes side by side",
+      "icon": "compare",
+      "category": "quotes"
+    },
+    {
+      "id": "customer-portal",
+      "name": "Customer Portal",
+      "description": "Customer login and project management",
+      "icon": "user",
+      "category": "portal"
+    },
+    {
+      "id": "ai-chat-agent",
+      "name": "AI Chat Agent",
+      "description": "Intelligent customer support chat",
+      "icon": "chat",
+      "category": "support"
+    },
+    {
+      "id": "appointment-scheduler",
+      "name": "Appointment Scheduler",
+      "description": "Schedule consultations and measurements",
+      "icon": "calendar",
+      "category": "scheduling"
+    }
+  ]
+}
+

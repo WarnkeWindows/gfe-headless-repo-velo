@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Good Faith Exteriors - Premium Windows & Doors Installation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a2332 0%, #0f1419 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header Navigation */
+        .header {
+            background: rgba(26, 35, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #d4af37;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: #d4af37;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #1a2332;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 80px;
+            padding: 4rem 2rem;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.3);
+        }
+
+        .hero-logo img {
+            width: 60px;
+            height: 60px;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #c0c0c0;
+            margin-bottom: 2rem;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .contact-item {
+            background: rgba(26, 35, 50, 0.6);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: #d4af37;
+            font-weight: 500;
+        }
+
+        /* Tools Grid */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tool-card {
+            background: rgba(26, 35, 50, 0.8);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .tool-card:hover::before {
+            left: 100%;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-8px);
+            border-color: #d4af37;
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.2);
+        }
+
+        .tool-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tool-icon img {
+            width: 40px;
+            height: 40px;
+            filter: brightness(0) invert(1);
+        }
+
+        .tool-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #d4af37;
+            margin-bottom: 1rem;
+        }
+
+        .tool-description {
+            color: #c0c0c0;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .tool-btn {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #1a2332;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tool-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Process Steps */
+        .process-section {
+            margin: 6rem 0;
+            text-align: center;
+        }
+
+        .process-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #d4af37;
+            margin-bottom: 3rem;
+        }
+
+        .process-steps {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+
+        .process-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 150px;
+            position: relative;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #1a2332;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .step-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .step-description {
+            font-size: 0.8rem;
+            color: #c0c0c0;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(15, 20, 25, 0.9);
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 3rem 2rem 2rem;
+            margin-top: 6rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            color: #d4af37;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .footer-section a {
+            color: #c0c0c0;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: #d4af37;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            color: #c0c0c0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .contact-info {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .process-steps {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* AI Chat Widget */
+        .ai-chat-widget {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .ai-chat-widget:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(212, 175, 55, 0.4);
+        }
+
+        .ai-chat-widget svg {
+            width: 24px;
+            height: 24px;
+            fill: #1a2332;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="https://static.wixstatic.com/media/10d52d_651a76065cb8426294f04e1b7483a3a2~mv2.png" alt="Good Faith Exteriors">
+                <span class="logo-text">GOOD FAITH EXTERIORS</span>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#windows">Windows</a></li>
+                    <li><a href="#doors">Doors</a></li>
+                    <li><a href="#estimator">Estimator</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </nav>
+            <button class="login-btn" onclick="openCustomerPortal()">Log In</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-logo">
+                <img src="https://static.wixstatic.com/media/10d52d_91ba6fdf18634b31b4ebedf5f0f7f8d3~mv2.png" alt="Good Faith Exteriors">
+            </div>
+            <h1 class="hero-title">Good Faith Exteriors</h1>
+            <p class="hero-subtitle">Premium Windows & Doors Installation</p>
+            
+            <div class="contact-info">
+                <div class="contact-item">📞 631-416-669</div>
+                <div class="contact-item">✉️ info@goodfaithexteriors.com</div>
+                <div class="contact-item">🌐 goodfaithexteriors.com</div>
+            </div>
+        </section>
+
+        <!-- Tools Grid -->
+        <section class="tools-grid">
+            <!-- AI Window Estimator -->
+            <div class="tool-card" onclick="openWidget('ai-window-estimator')">
+                <div class="tool-icon">
+                    <img src="https://static.wixstatic.com/media/10d52d_1f0bc35da9f64cfaaf3e7bdd0e19e46d~mv2.png" alt="AI Window Estimator">
+                </div>
+                <h3 class="tool-title">AI Window Estimator</h3>
+                <p class="tool-description">Get instant window estimates using AI-powered image analysis and measurements</p>
+                <button class="tool-btn">Get Instant Quote</button>
+            </div>
+
+            <!-- Good Faith Estimator -->
+            <div class="tool-card" onclick="openWidget('good-faith-estimator')">
+                <div class="tool-icon">
+                    <img src="https://static.wixstatic.com/media/10d52d_d988707487cd498ab95e653e09f5ca4a~mv2.png" alt="Good Faith Estimator">
+                </div>
+                <h3 class="tool-title">Good Faith Estimator</h3>
+                <p class="tool-description">Complete step-by-step window estimation with detailed pricing breakdown</p>
+                <button class="tool-btn">Start Estimate</button>
+            </div>
+
+            <!-- AI Window Measure -->
+            <div class="tool-card" onclick="openWidget('ai-window-measure')">
+                <div class="tool-icon">
+                    <img src="https://static.wixstatic.com/media/10d52d_75a7fe388bbd430cbb8b880f0f2a4914~mv2.png" alt="AI Window Measure">
+                </div>
+                <h3 class="tool-title">AI Window Measure</h3>
+                <p class="tool-description">Accurate window measurements using AI photo analysis technology</p>
+                <button class="tool-btn">Measure Windows</button>
+            </div>
+
+            <!-- Product Browser -->
+            <div class="tool-card" onclick="openWidget('product-browser')">
+                <div class="tool-icon">
+                    <img src="https://static.wixstatic.com/media/10d52d_eea1622cce0b4367b734bb51a0d81eb8~mv2.jpg" alt="Product Browser">
+                </div>
+                <h3 class="tool-title">Product Browser</h3>
+                <p class="tool-description">Browse our complete catalog of premium windows and doors from top brands</p>
+                <button class="tool-btn">Browse Products</button>
+            </div>
+
+            <!-- Quote Comparison -->
+            <div class="tool-card" onclick="openWidget('quote-comparison')">
+                <div class="tool-icon">
+                    <img src="https://static.wixstatic.com/media/10d52d_d988707487cd498ab95e653e09f5ca4a~mv2.png" alt="Quote Comparison">
+                </div>
+                <h3 class="tool-title">Quote Comparison</h3>
+                <p class="tool-description">Compare multiple quotes side-by-side to make the best decision</p>
+                <button class="tool-btn">Compare Quotes</button>
+            </div>
+
+            <!-- Schedule Consultation -->
+            <div class="tool-card" onclick="openWidget('appointment-scheduler')">
+                <div class="tool-icon">
+                    <img src="https://static.wixstatic.com/media/10d52d_eea1622cce0b4367b734bb51a0d81eb8~mv2.jpg" alt="Schedule Consultation">
+                </div>
+                <h3 class="tool-title">Schedule Consultation</h3>
+                <p class="tool-description">Book a free in-home consultation with our window experts</p>
+                <button class="tool-btn">Schedule Visit</button>
+            </div>
+
+            <!-- Customer Portal -->
+            <div class="tool-card" onclick="openWidget('customer-portal')">
+                <div class="tool-icon">
+                    <img src="https://static.wixstatic.com/media/10d52d_91ba6fdf18634b31b4ebedf5f0f7f8d3~mv2.png" alt="Customer Portal">
+                </div>
+                <h3 class="tool-title">Customer Portal</h3>
+                <p class="tool-description">Access your projects, quotes, and account information</p>
+                <button class="tool-btn">Access Portal</button>
+            </div>
+
+            <!-- Measure Windows -->
+            <div class="tool-card" onclick="openWidget('measure-windows')">
+                <div class="tool-icon">
+                    <img src="https://static.wixstatic.com/media/10d52d_1f0bc35da9f64cfaaf3e7bdd0e19e46d~mv2.png" alt="Measure Windows">
+                </div>
+                <h3 class="tool-title">Measure Windows</h3>
+                <p class="tool-description">Professional window measurement tools and guides</p>
+                <button class="tool-btn">Measure Windows</button>
+            </div>
+        </section>
+
+        <!-- Process Steps -->
+        <section class="process-section">
+            <h2 class="process-title">Get Online Quotes in Minutes - Real Products, Real Pricing.</h2>
+            <div class="process-steps">
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Select Your Window Style</div>
+                    <div class="step-description">Choose from our premium window options</div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Pick Your Brand & Series</div>
+                    <div class="step-description">Select from top manufacturers</div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Enter Measurements or Upload Photos</div>
+                    <div class="step-description">Provide dimensions or use AI analysis</div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Customize Materials & Colors</div>
+                    <div class="step-description">Personalize your selection</div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Review & Get Online Quote</div>
+                    <div class="step-description">Instant pricing with detailed breakdown</div>
+                </div>
+            </div>
+            <p style="color: #d4af37; font-weight: 600; font-size: 1.1rem;">NO SALES PRESSURE, NO SURPRISES</p>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Services</h3>
+                <a href="#windows">Windows</a>
+                <a href="#doors">Doors</a>
+                <a href="#estimator">Estimator</a>
+                <a href="#consultation">Consultation</a>
+            </div>
+            <div class="footer-section">
+                <h3>Company</h3>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+                <a href="#careers">Careers</a>
+                <a href="#reviews">Reviews</a>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <a href="#help">Help Center</a>
+                <a href="#warranty">Warranty</a>
+                <a href="#financing">Financing</a>
+                <a href="#maintenance">Maintenance</a>
+            </div>
+            <div class="footer-section">
+                <h3>Connect</h3>
+                <a href="#facebook">Facebook</a>
+                <a href="#instagram">Instagram</a>
+                <a href="#linkedin">LinkedIn</a>
+                <a href="#youtube">YouTube</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Licensed. Local. Transparent. Never pushy.</p>
+            <p>© 2025 Good Faith Exteriors | Online Quotes: All rights reserved</p>
+        </div>
+    </footer>
+
+    <!-- AI Chat Widget -->
+    <div class="ai-chat-widget" onclick="openAIChat()">
+        <svg viewBox="0 0 24 24">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+        </svg>
+    </div>
+
+    <script>
+        // Widget opening functions
+        function openWidget(widgetId) {
+            console.log('Opening widget:', widgetId);
+            // This will be connected to the Wix Headless Blocks App
+            window.parent.postMessage({
+                type: 'OPEN_WIDGET',
+                widgetId: widgetId
+            }, '*');
+        }
+
+        function openCustomerPortal() {
+            openWidget('customer-portal');
+        }
+
+        function openAIChat() {
+            openWidget('ai-chat-agent');
+        }
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(26, 35, 50, 0.98)';
+            } else {
+                header.style.background = 'rgba(26, 35, 50, 0.95)';
+            }
+        });
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe tool cards for animation
+        document.querySelectorAll('.tool-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
+

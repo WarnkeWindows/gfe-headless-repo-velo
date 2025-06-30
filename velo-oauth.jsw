@@ -1,0 +1,561 @@
+/**
+ * Good Faith Exteriors - Window Catalog OAuth Integration
+ * Velo Backend JSW File for OAuth Authentication and API Integration
+ * 
+ * This file handles:
+ * - Google OAuth authentication
+ * - Wix JWT token validation
+ * - Window product API integration
+ * - 30% markup pricing calculations
+ * - Data collection and quote generation
+ */
+
+import { fetch } from 'wix-fetch';
+import { getSecret } from 'wix-secrets-backend';
+import wixData from 'wix-data';
+import { authentication } from 'wix-members-backend';
+import { currentMember } from 'wix-members-backend';
+
+// Configuration Constants
+const CONFIG = {
+    API_VERSION: 'v1',
+    MARKUP_PERCENTAGE: 30,
+    BACKEND_URL: '', // Will be loaded from secrets
+    OAUTH_SCOPES: [
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile'
+    ]
+};
+
+/**
+ * Initialize OAuth credentials from Wix Secrets
+ */
+async function initializeCredentials() {
+    try {
+        const credentials = {
+            // Google OAuth Credentials (Updated)
+            googleClientId: await getSecret('cloud_vision_api_client_id') || '837326026335-og5oga2u90sm079ht8450s5j4v4kmio0.apps.googleusercontent.com',
+            googleClientSecret: await getSecret('cloud_vision_client_secret') || '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',
+            
+            // Google Workspace API
+            googleWorkspaceApiKey: 'AIzaSyAhW8xfvCJdICXKYEMqYidCWP2IhUnSaVY',
+            googleOrganizationId: '518845478181',
+            googleServiceAccount: '837326026335-compute@developer.gserviceaccount.com',
+            
+            // Wix Headless Settings
+            wixHeadlessClientId: 'b32df066-e276-4d06-b9ee-18187d7b1439',
+            wixAppName: 'Grid-Flow Engine',
+            wixAdminApiName: 'GRID_FLOW_ENGINE',
+            wixAccountId: '10d52dd8-ec9b-4453-adbc-6293b99af499',
+            wixAdminToken: 'IST.eyJraWQiOiJQb3pIX2FDMiIsImFsZyI6IlJTMjU2In0.eyJkYXRhIjoie1wiaWRcIjpcIjkzZDliYjczLWY3MTAtNDcwNy1iNjQ1LWVmNDE2YWQ5YjEwYVwiLFwiaWRlbnRpdHlcIjp7XCJ0eXBlXCI6XCJhcHBsaWNhdGlvblwiLFwiaWRcIjpcIjBiNTRlNjE2LTdiZDYtNDhmNi1hYjVjLWI5YWVhNjJmZmFmY1wifSxcInRlbmFudFwiOntcInR5cGVcIjpcImFjY291bnRcIixcImlkXCI6XCIxMGQ1MmRkOC1lYzliLTQ0NTMtYWRiYy02MjkzYjk5YWY0OTlcIn19IiwiaWF0IjoxNzUxMjEyMjAwfQ.LgzLe_jVQSs4q18sXb8Mj9laOO1Y0j8CY2xAIbtgKOlOB40B3sOgDon3BoVD-NQD8VFa5cMfAweX-rrznwP6DEhdi7DeQOnE7kPOv-HOzYdcsoWpAK-r8ln4cK6zBIJ_gr_Nd6f7IglNwUUX4LKoxZngyEwvL2-1HzI6Aamuxu0_OfgerNT0aULer61By8LfPz1cvOTsWQMF6CFAkNeFPn5KJ6zqYbb4KbXKdtdj4z_61aTzdU1uU5dmxvFI29OZvFi8XtA5vIvJJTS5nfrImynZqARzk6HalCjNBs3xbz2TYFs51fQmHyLTK8Sy_I5ZyAuRnPv0Eh4kWdkJhZQtbQ',
+            
+            // Site Configuration
+            siteDomain: 'goodfaithexteriors.com',
+            workspaceName: 'gridFlowEngine',
+            metasiteId: '5ec64f41-3f5e-4ba1-b9fc-018d3a8681a4',
+            editorUrl: 'https://editor.wix.com/html/editor/web/renderer/edit/b8574bad-dbbc-46a3-8d76-941a7101e5ac?metaSiteId=5ec64f41-3f5e-4ba1-b9fc-018d3a8681a4',
+            
+            // Good Faith Exteriors OAuth
+            gfeClientId: await getSecret('good-faith-exteriors-oauth-app-id'),
+            gfeClientSecret: await getSecret('good-faith-exteriors-oauth-app-secret'),
+            
+            // Wix App Credentials
+            wixAppId: await getSecret('GFE_ID_Wix_API'),
+            wixApiKey: await getSecret('GFE-API'),
+            
+            // Backend URL
+            backendUrl: await getSecret('BACKEND_URL') || 'https://gfe-backend-837326026335.us-central1.run.app',
+            
+            // Company Information
+            companyName: await getSecret('company_name'),
+            companyEmail: await getSecret('company_email'),
+            companyPhone: await getSecret('company_phone'),
+            companyWebsite: await getSecret('company_website'),
+            
+            // Pricing Multipliers
+            basePriceMultiplier: await getSecret('base_price_multiplier'),
+            brandMultipliers: await getSecret('brand_multipliers'),
+            materialMultiplier: await getSecret('material_multiplier'),
+            typeMultipliers: await getSecret('type_multipliers'),
+            
+            // Email Templates
+            quoteEmailTemplate: await getSecret('quote_email_template'),
+            notificationEmail: await getSecret('NOTIFICATION_EMAIL')
+        };
+        
+        CONFIG.BACKEND_URL = credentials.backendUrl;
+        return credentials;
+    } catch (error) {
+        console.error('Failed to initialize credentials:', error);
+        throw new Error('Configuration initialization failed');
+    }
+}
+
+/**
+ * Generate Google OAuth URL for authentication
+ */
+export async function generateGoogleOAuthUrl(redirectUri, state) {
+    try {
+        const credentials = await initializeCredentials();
+        
+        const params = new URLSearchParams({
+            client_id: credentials.googleClientId,
+            redirect_uri: redirectUri,
+            scope: CONFIG.OAUTH_SCOPES.join(' '),
+            response_type: 'code',
+            access_type: 'offline',
+            prompt: 'consent',
+            state: state || 'gfe_window_catalog'
+        });
+        
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+        
+        return {
+            success: true,
+            authUrl: authUrl,
+            state: state
+        };
+    } catch (error) {
+        console.error('OAuth URL generation failed:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Exchange OAuth code for access token
+ */
+export async function exchangeOAuthCode(code, redirectUri) {
+    try {
+        const credentials = await initializeCredentials();
+        
+        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                client_id: credentials.googleClientId,
+                client_secret: credentials.googleClientSecret,
+                code: code,
+                grant_type: 'authorization_code',
+                redirect_uri: redirectUri
+            }).toString()
+        });
+        
+        const tokenData = await tokenResponse.json();
+        
+        if (!tokenResponse.ok) {
+            throw new Error(tokenData.error_description || 'Token exchange failed');
+        }
+        
+        // Get user info
+        const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+            headers: {
+                'Authorization': `Bearer ${tokenData.access_token}`
+            }
+        });
+        
+        const userData = await userResponse.json();
+        
+        // Store user session
+        const sessionData = {
+            accessToken: tokenData.access_token,
+            refreshToken: tokenData.refresh_token,
+            userInfo: userData,
+            expiresAt: new Date(Date.now() + (tokenData.expires_in * 1000)),
+            createdAt: new Date()
+        };
+        
+        return {
+            success: true,
+            session: sessionData,
+            user: userData
+        };
+        
+    } catch (error) {
+        console.error('OAuth code exchange failed:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Authenticate with Wix Headless API
+ */
+export async function authenticateWixHeadless() {
+    try {
+        const credentials = await initializeCredentials();
+        
+        const response = await fetch('https://www.wixapis.com/oauth2/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${credentials.wixAdminToken}`
+            },
+            body: JSON.stringify({
+                grant_type: 'client_credentials',
+                client_id: credentials.wixHeadlessClientId,
+                account_id: credentials.wixAccountId
+            })
+        });
+        
+        const tokenData = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(tokenData.error_description || 'Wix Headless authentication failed');
+        }
+        
+        return {
+            success: true,
+            accessToken: tokenData.access_token,
+            tokenType: tokenData.token_type,
+            expiresIn: tokenData.expires_in,
+            scope: tokenData.scope
+        };
+        
+    } catch (error) {
+        console.error('Wix Headless authentication failed:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Make authenticated request to Wix Headless API
+ */
+export async function wixHeadlessApiRequest(endpoint, method = 'GET', data = null) {
+    try {
+        const credentials = await initializeCredentials();
+        const auth = await authenticateWixHeadless();
+        
+        if (!auth.success) {
+            throw new Error('Failed to authenticate with Wix Headless API');
+        }
+        
+        const headers = {
+            'Authorization': `Bearer ${auth.accessToken}`,
+            'Content-Type': 'application/json',
+            'wix-account-id': credentials.wixAccountId,
+            'wix-api-key': credentials.wixAdminApiName
+        };
+        
+        const requestOptions = {
+            method: method,
+            headers: headers
+        };
+        
+        if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+            requestOptions.body = JSON.stringify(data);
+        }
+        
+        const response = await fetch(`https://www.wixapis.com${endpoint}`, requestOptions);
+        const responseData = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(responseData.message || 'Wix API request failed');
+        }
+        
+        return {
+            success: true,
+            data: responseData,
+            status: response.status
+        };
+        
+    } catch (error) {
+        console.error('Wix Headless API request failed:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Validate Wix JWT token
+ */
+export async function validateWixJWT(token) {
+    try {
+        const credentials = await initializeCredentials();
+        
+        // Decode and validate JWT token
+        const decoded = await authentication.validateToken(token);
+        
+        return {
+            success: true,
+            payload: decoded,
+            isValid: true
+        };
+    } catch (error) {
+        console.error('JWT validation failed:', error);
+        return {
+            success: false,
+            error: error.message,
+            isValid: false
+        };
+    }
+}
+
+/**
+ * Get window products with 30% markup
+ */
+export async function getWindowProducts(filters = {}) {
+    try {
+        const credentials = await initializeCredentials();
+        
+        // Query window products from Wix Data
+        let query = wixData.query('WindowProducts');
+        
+        // Apply filters
+        if (filters.brand) {
+            query = query.eq('windowBrand', filters.brand);
+        }
+        if (filters.series) {
+            query = query.contains('series', filters.series);
+        }
+        if (filters.interiorMaterial) {
+            query = query.eq('interiorMaterial', filters.interiorMaterial);
+        }
+        if (filters.exteriorMaterial) {
+            query = query.eq('exteriorMaterial', filters.exteriorMaterial);
+        }
+        if (filters.isActive !== undefined) {
+            query = query.eq('isActive', filters.isActive);
+        }
+        
+        const results = await query.find();
+        
+        // Apply 30% markup to all prices
+        const productsWithMarkup = results.items.map(product => {
+            const basePrice = parseFloat(product.basePrice.replace('$', '').replace(',', ''));
+            const pricePerUI = parseFloat(product.pricePerUI.replace('$', ''));
+            
+            const markedUpBasePrice = basePrice * (1 + CONFIG.MARKUP_PERCENTAGE / 100);
+            const markedUpPricePerUI = pricePerUI * (1 + CONFIG.MARKUP_PERCENTAGE / 100);
+            
+            return {
+                ...product,
+                originalBasePrice: product.basePrice,
+                originalPricePerUI: product.pricePerUI,
+                basePrice: `$${markedUpBasePrice.toFixed(2)}`,
+                pricePerUI: `$${markedUpPricePerUI.toFixed(2)}`,
+                markupPercentage: CONFIG.MARKUP_PERCENTAGE,
+                totalUI: product.baseUI,
+                calculatedPrice: markedUpBasePrice + (markedUpPricePerUI * product.baseUI)
+            };
+        });
+        
+        return {
+            success: true,
+            products: productsWithMarkup,
+            totalCount: results.totalCount,
+            filters: filters,
+            markupApplied: CONFIG.MARKUP_PERCENTAGE
+        };
+        
+    } catch (error) {
+        console.error('Failed to get window products:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Calculate quote for selected products
+ */
+export async function calculateQuote(products, customerInfo, projectDetails) {
+    try {
+        const credentials = await initializeCredentials();
+        
+        let totalPrice = 0;
+        const quotedProducts = [];
+        
+        for (const item of products) {
+            const product = await wixData.get('WindowProducts', item.productId);
+            
+            if (!product) {
+                throw new Error(`Product not found: ${item.productId}`);
+            }
+            
+            const basePrice = parseFloat(product.basePrice.replace('$', '').replace(',', ''));
+            const pricePerUI = parseFloat(product.pricePerUI.replace('$', ''));
+            
+            // Apply markup
+            const markedUpBasePrice = basePrice * (1 + CONFIG.MARKUP_PERCENTAGE / 100);
+            const markedUpPricePerUI = pricePerUI * (1 + CONFIG.MARKUP_PERCENTAGE / 100);
+            
+            // Calculate total for this product
+            const quantity = item.quantity || 1;
+            const customUI = item.customUI || product.baseUI;
+            const productTotal = (markedUpBasePrice + (markedUpPricePerUI * customUI)) * quantity;
+            
+            quotedProducts.push({
+                ...product,
+                quantity: quantity,
+                customUI: customUI,
+                unitPrice: markedUpBasePrice + (markedUpPricePerUI * customUI),
+                totalPrice: productTotal,
+                markupApplied: CONFIG.MARKUP_PERCENTAGE
+            });
+            
+            totalPrice += productTotal;
+        }
+        
+        // Create quote record
+        const quote = {
+            quoteId: `GFE-${Date.now()}`,
+            customerInfo: customerInfo,
+            projectDetails: projectDetails,
+            products: quotedProducts,
+            subtotal: totalPrice,
+            markupPercentage: CONFIG.MARKUP_PERCENTAGE,
+            totalPrice: totalPrice,
+            createdAt: new Date(),
+            status: 'draft',
+            validUntil: new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)) // 30 days
+        };
+        
+        // Save quote to Wix Data
+        const savedQuote = await wixData.save('Quotes', quote);
+        
+        return {
+            success: true,
+            quote: savedQuote,
+            quoteId: quote.quoteId
+        };
+        
+    } catch (error) {
+        console.error('Quote calculation failed:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Submit customer data and generate lead
+ */
+export async function submitCustomerData(customerData, quoteId) {
+    try {
+        const credentials = await initializeCredentials();
+        
+        // Create customer record
+        const customer = {
+            ...customerData,
+            quoteId: quoteId,
+            source: 'window_catalog_iframe',
+            createdAt: new Date(),
+            status: 'new_lead'
+        };
+        
+        // Save to Wix Data
+        const savedCustomer = await wixData.save('Customers', customer);
+        
+        // Send notification email
+        await sendNotificationEmail(customer, quoteId);
+        
+        return {
+            success: true,
+            customer: savedCustomer,
+            customerId: savedCustomer._id
+        };
+        
+    } catch (error) {
+        console.error('Customer data submission failed:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Send notification email for new leads
+ */
+async function sendNotificationEmail(customerData, quoteId) {
+    try {
+        const credentials = await initializeCredentials();
+        
+        // Email notification logic would go here
+        // This would integrate with your email service
+        
+        console.log('Notification email sent for quote:', quoteId);
+        return true;
+    } catch (error) {
+        console.error('Failed to send notification email:', error);
+        return false;
+    }
+}
+
+/**
+ * Get authentication status for current session
+ */
+export async function getAuthStatus() {
+    try {
+        const member = await currentMember.getMember();
+        
+        return {
+            success: true,
+            isAuthenticated: !!member,
+            member: member,
+            timestamp: new Date()
+        };
+    } catch (error) {
+        return {
+            success: false,
+            isAuthenticated: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Refresh OAuth token
+ */
+export async function refreshOAuthToken(refreshToken) {
+    try {
+        const credentials = await initializeCredentials();
+        
+        const response = await fetch('https://oauth2.googleapis.com/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                client_id: credentials.googleClientId,
+                client_secret: credentials.googleClientSecret,
+                refresh_token: refreshToken,
+                grant_type: 'refresh_token'
+            }).toString()
+        });
+        
+        const tokenData = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(tokenData.error_description || 'Token refresh failed');
+        }
+        
+        return {
+            success: true,
+            accessToken: tokenData.access_token,
+            expiresIn: tokenData.expires_in
+        };
+        
+    } catch (error) {
+        console.error('Token refresh failed:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+

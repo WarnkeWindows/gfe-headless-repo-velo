@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Window Estimator - Good Faith Exteriors</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a2332 0%, #0f1419 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #c0c0c0;
+            margin-bottom: 2rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .estimator-section {
+            background: rgba(26, 35, 50, 0.8);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #d4af37;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-indicator {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #1a2332;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(212, 175, 55, 0.5);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #d4af37;
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: #d4af37;
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #c0c0c0;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtext {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #1a2332;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #d4af37;
+            padding: 0.75rem 2rem;
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: #d4af37;
+            color: #1a2332;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            color: #d4af37;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(15, 20, 25, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .window-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .window-type {
+            background: rgba(15, 20, 25, 0.8);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .window-type:hover, .window-type.selected {
+            border-color: #d4af37;
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .window-type img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 0.5rem;
+            filter: brightness(0.8);
+        }
+
+        .window-type.selected img {
+            filter: brightness(1);
+        }
+
+        .window-type-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #c0c0c0;
+        }
+
+        .window-type.selected .window-type-name {
+            color: #d4af37;
+        }
+
+        .quote-summary {
+            background: rgba(26, 35, 50, 0.8);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .quote-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #d4af37;
+            margin-bottom: 2rem;
+        }
+
+        .quote-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .quote-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .quote-label {
+            color: #c0c0c0;
+        }
+
+        .quote-value {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .total-section {
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .total-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #d4af37;
+        }
+
+        .total-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #d4af37;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(15, 20, 25, 0.8);
+            border-radius: 4px;
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .ai-analysis {
+            background: rgba(15, 20, 25, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .ai-analysis-title {
+            color: #d4af37;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ai-analysis-content {
+            color: #c0c0c0;
+            line-height: 1.6;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50%;
+            border-top-color: #d4af37;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .brand-logos {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .brand-logo {
+            width: 60px;
+            height: 40px;
+            object-fit: contain;
+            filter: brightness(0.7);
+            transition: filter 0.3s ease;
+        }
+
+        .brand-logo:hover {
+            filter: brightness(1);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .quote-summary {
+                position: static;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .window-types {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="https://static.wixstatic.com/media/10d52d_1f0bc35da9f64cfaaf3e7bdd0e19e46d~mv2.png" alt="AI Window Estimator">
+            </div>
+            <h1 class="title">The Good Faith Estimator™</h1>
+            <p class="subtitle">Get Online Quotes in Minutes - Real Products, Real Pricing.</p>
+            
+            <div class="brand-logos">
+                <img src="https://static.wixstatic.com/media/10d52d_19c62f7d131445829ff8fdde2b581b98~mv2.jpeg" alt="Andersen" class="brand-logo">
+                <img src="https://static.wixstatic.com/media/10d52d_7df98cb648bb485d8e2f0922a3da18f4~mv2.jpeg" alt="Marvin" class="brand-logo">
+                <img src="https://static.wixstatic.com/media/10d52d_739b01217f084e21a41dd8591b98e6b8~mv2.jpeg" alt="Pella" class="brand-logo">
+                <img src="https://static.wixstatic.com/media/10d52d_bcbbb5675e7b496891f63cb64e37fa07~mv2.png" alt="Provia" class="brand-logo">
+                <img src="https://static.wixstatic.com/media/10d52d_da963919e25c46c9bd735ee4bbce0da9~mv2.jpeg" alt="Windsor" class="brand-logo">
+                <img src="https://static.wixstatic.com/media/10d52d_a333c0355ff14c6cb0ac68755b29b1f3~mv2.jpeg" alt="Thermo-Tech" class="brand-logo">
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="estimator-section">
+                <h2 class="section-title">
+                    <span class="step-indicator">1</span>
+                    Select Your Window Style
+                </h2>
+
+                <div class="window-types" id="windowTypes">
+                    <div class="window-type" data-type="awning">
+                        <img src="https://static.wixstatic.com/media/10d52d_35742c77270640e7bce240ef7280568c~mv2.png" alt="Awning">
+                        <div class="window-type-name">Awning</div>
+                    </div>
+                    <div class="window-type" data-type="casement">
+                        <img src="https://static.wixstatic.com/media/10d52d_79a4cd4776a94ba2a958989178a6ee7f~mv2.png" alt="Casement">
+                        <div class="window-type-name">Casement</div>
+                    </div>
+                    <div class="window-type" data-type="double-hung">
+                        <img src="https://static.wixstatic.com/media/10d52d_b8bfb21fc4d6460ebce21673473667f5~mv2.png" alt="Double Hung">
+                        <div class="window-type-name">Double Hung</div>
+                    </div>
+                    <div class="window-type" data-type="slider">
+                        <img src="https://static.wixstatic.com/media/10d52d_d4baffa175394b2c88b4f75dfd833eeb~mv2.png" alt="Slider">
+                        <div class="window-type-name">Slider</div>
+                    </div>
+                    <div class="window-type" data-type="bay">
+                        <img src="https://static.wixstatic.com/media/10d52d_27545cce879743aeb6e85256d4837f97~mv2.png" alt="Bay">
+                        <div class="window-type-name">Bay</div>
+                    </div>
+                    <div class="window-type" data-type="picture">
+                        <img src="https://static.wixstatic.com/media/10d52d_12cbfe1efc744559b497c3acbf43fe8f~mv2.png" alt="Picture">
+                        <div class="window-type-name">Picture</div>
+                    </div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div id="step2" style="display: none;">
+                    <h2 class="section-title">
+                        <span class="step-indicator">2</span>
+                        Upload Window Photos or Enter Measurements
+                    </h2>
+
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <svg width="24" height="24" fill="#1a2332" viewBox="0 0 24 24">
+                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                            </svg>
+                        </div>
+                        <div class="upload-text">Drop your window photos here or click to upload</div>
+                        <div class="upload-subtext">Supports JPG, PNG, HEIC up to 10MB</div>
+                        <input type="file" id="fileInput" class="file-input" multiple accept="image/*">
+                    </div>
+
+                    <div style="text-align: center; margin: 2rem 0;">
+                        <span style="color: #c0c0c0;">OR</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Window Width (inches)</label>
+                        <input type="number" class="form-input" id="windowWidth" placeholder="Enter width">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Window Height (inches)</label>
+                        <input type="number" class="form-input" id="windowHeight" placeholder="Enter height">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Number of Windows</label>
+                        <input type="number" class="form-input" id="windowCount" value="1" min="1">
+                    </div>
+                </div>
+
+                <div id="step3" style="display: none;">
+                    <h2 class="section-title">
+                        <span class="step-indicator">3</span>
+                        Select Brand and Material
+                    </h2>
+
+                    <div class="form-group">
+                        <label class="form-label">Window Brand</label>
+                        <select class="form-select" id="windowBrand">
+                            <option value="">Select a brand</option>
+                            <option value="andersen">Andersen</option>
+                            <option value="marvin">Marvin</option>
+                            <option value="pella">Pella</option>
+                            <option value="provia">Provia</option>
+                            <option value="windsor">Windsor</option>
+                            <option value="thermo-tech">Thermo-Tech</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Frame Material</label>
+                        <select class="form-select" id="frameMaterial">
+                            <option value="">Select material</option>
+                            <option value="vinyl">Vinyl</option>
+                            <option value="wood">Wood</option>
+                            <option value="fiberglass">Fiberglass</option>
+                            <option value="aluminum">Aluminum</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Glass Type</label>
+                        <select class="form-select" id="glassType">
+                            <option value="">Select glass type</option>
+                            <option value="double-pane">Double Pane</option>
+                            <option value="triple-pane">Triple Pane</option>
+                            <option value="low-e">Low-E Coating</option>
+                            <option value="argon-filled">Argon Filled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="aiAnalysis" class="ai-analysis" style="display: none;">
+                    <div class="ai-analysis-title">
+                        <span class="loading-spinner"></span>
+                        AI Analysis in Progress
+                    </div>
+                    <div class="ai-analysis-content" id="aiAnalysisContent">
+                        Analyzing your window photos and specifications...
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn-secondary" id="backBtn" onclick="previousStep()" style="display: none;">Back</button>
+                    <button class="btn-primary" id="nextBtn" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <div class="quote-summary">
+                <h3 class="quote-title">QUOTE SUMMARY</h3>
+                
+                <div class="quote-item">
+                    <span class="quote-label">Quote ID</span>
+                    <span class="quote-value" id="quoteId">-</span>
+                </div>
+                
+                <div class="quote-item">
+                    <span class="quote-label">Window Type</span>
+                    <span class="quote-value" id="selectedType">-</span>
+                </div>
+                
+                <div class="quote-item">
+                    <span class="quote-label">Quantity</span>
+                    <span class="quote-value" id="selectedQuantity">-</span>
+                </div>
+                
+                <div class="quote-item">
+                    <span class="quote-label">Brand</span>
+                    <span class="quote-value" id="selectedBrand">-</span>
+                </div>
+                
+                <div class="quote-item">
+                    <span class="quote-label">Material</span>
+                    <span class="quote-value" id="selectedMaterial">-</span>
+                </div>
+                
+                <div class="quote-item">
+                    <span class="quote-label">Subtotal</span>
+                    <span class="quote-value" id="subtotal">$0.00</span>
+                </div>
+                
+                <div class="quote-item">
+                    <span class="quote-label">Installation</span>
+                    <span class="quote-value" id="installation">$0.00</span>
+                </div>
+                
+                <div class="total-section">
+                    <div class="quote-item">
+                        <span class="total-label">Total</span>
+                        <span class="total-value" id="total">$0.00</span>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="downloadPDF()">Download PDF</button>
+                    <button class="btn-secondary" onclick="emailQuote()">Email Me My Quote</button>
+                </div>
+
+                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(212, 175, 55, 0.2);">
+                    <h4 style="color: #d4af37; margin-bottom: 1rem;">CUSTOMER INFO</h4>
+                    <div class="form-group">
+                        <input type="text" class="form-input" id="customerName" placeholder="Name">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" class="form-input" id="customerEmail" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" class="form-input" id="customerPhone" placeholder="Phone">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let selectedWindowType = '';
+        let quoteData = {
+            id: generateQuoteId(),
+            type: '',
+            quantity: 1,
+            brand: '',
+            material: '',
+            width: 0,
+            height: 0,
+            subtotal: 0,
+            installation: 0,
+            total: 0
+        };
+
+        function generateQuoteId() {
+            return 'GFE-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
+
+        // Initialize
+        document.getElementById('quoteId').textContent = quoteData.id;
+
+        // Window type selection
+        document.querySelectorAll('.window-type').forEach(type => {
+            type.addEventListener('click', function() {
+                document.querySelectorAll('.window-type').forEach(t => t.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedWindowType = this.dataset.type;
+                quoteData.type = this.querySelector('.window-type-name').textContent;
+                updateQuoteSummary();
+                updateProgress(33);
+            });
+        });
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                showAIAnalysis();
+                // Simulate AI analysis
+                setTimeout(() => {
+                    hideAIAnalysis();
+                    updateProgress(66);
+                }, 3000);
+            }
+        }
+
+        function showAIAnalysis() {
+            document.getElementById('aiAnalysis').style.display = 'block';
+            document.getElementById('aiAnalysisContent').textContent = 'Analyzing your window photos and specifications...';
+        }
+
+        function hideAIAnalysis() {
+            document.getElementById('aiAnalysis').style.display = 'none';
+        }
+
+        // Form input handlers
+        document.getElementById('windowWidth').addEventListener('input', updateDimensions);
+        document.getElementById('windowHeight').addEventListener('input', updateDimensions);
+        document.getElementById('windowCount').addEventListener('input', updateQuantity);
+        document.getElementById('windowBrand').addEventListener('change', updateBrand);
+        document.getElementById('frameMaterial').addEventListener('change', updateMaterial);
+
+        function updateDimensions() {
+            quoteData.width = parseFloat(document.getElementById('windowWidth').value) || 0;
+            quoteData.height = parseFloat(document.getElementById('windowHeight').value) || 0;
+            calculatePricing();
+        }
+
+        function updateQuantity() {
+            quoteData.quantity = parseInt(document.getElementById('windowCount').value) || 1;
+            updateQuoteSummary();
+            calculatePricing();
+        }
+
+        function updateBrand() {
+            const brand = document.getElementById('windowBrand').value;
+            quoteData.brand = brand;
+            updateQuoteSummary();
+            calculatePricing();
+        }
+
+        function updateMaterial() {
+            const material = document.getElementById('frameMaterial').value;
+            quoteData.material = material;
+            updateQuoteSummary();
+            calculatePricing();
+        }
+
+        function calculatePricing() {
+            if (quoteData.width && quoteData.height && quoteData.brand && quoteData.material) {
+                const area = (quoteData.width * quoteData.height) / 144; // Convert to sq ft
+                let basePrice = 200; // Base price per sq ft
+                
+                // Brand multipliers
+                const brandMultipliers = {
+                    'andersen': 1.3,
+                    'marvin': 1.4,
+                    'pella': 1.2,
+                    'provia': 1.1,
+                    'windsor': 1.0,
+                    'thermo-tech': 1.15
+                };
+                
+                // Material multipliers
+                const materialMultipliers = {
+                    'vinyl': 1.0,
+                    'wood': 1.5,
+                    'fiberglass': 1.3,
+                    'aluminum': 0.9
+                };
+                
+                const brandMultiplier = brandMultipliers[quoteData.brand] || 1.0;
+                const materialMultiplier = materialMultipliers[quoteData.material] || 1.0;
+                
+                quoteData.subtotal = Math.round(area * basePrice * brandMultiplier * materialMultiplier * quoteData.quantity);
+                quoteData.installation = Math.round(quoteData.subtotal * 0.3); // 30% installation
+                quoteData.total = quoteData.subtotal + quoteData.installation;
+                
+                updateQuoteSummary();
+                updateProgress(100);
+            }
+        }
+
+        function updateQuoteSummary() {
+            document.getElementById('selectedType').textContent = quoteData.type || '-';
+            document.getElementById('selectedQuantity').textContent = quoteData.quantity || '-';
+            document.getElementById('selectedBrand').textContent = quoteData.brand || '-';
+            document.getElementById('selectedMaterial').textContent = quoteData.material || '-';
+            document.getElementById('subtotal').textContent = '$' + (quoteData.subtotal || 0).toLocaleString() + '.00';
+            document.getElementById('installation').textContent = '$' + (quoteData.installation || 0).toLocaleString() + '.00';
+            document.getElementById('total').textContent = '$' + (quoteData.total || 0).toLocaleString() + '.00';
+        }
+
+        function updateProgress(percentage) {
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
+
+        function nextStep() {
+            if (currentStep === 1 && selectedWindowType) {
+                document.getElementById('step2').style.display = 'block';
+                document.getElementById('backBtn').style.display = 'inline-block';
+                currentStep = 2;
+            } else if (currentStep === 2 && (quoteData.width || fileInput.files.length > 0)) {
+                document.getElementById('step3').style.display = 'block';
+                currentStep = 3;
+                document.getElementById('nextBtn').textContent = 'Get Quote';
+            } else if (currentStep === 3) {
+                calculatePricing();
+                document.getElementById('nextBtn').style.display = 'none';
+            }
+        }
+
+        function previousStep() {
+            if (currentStep === 2) {
+                document.getElementById('step2').style.display = 'none';
+                document.getElementById('backBtn').style.display = 'none';
+                currentStep = 1;
+            } else if (currentStep === 3) {
+                document.getElementById('step3').style.display = 'none';
+                document.getElementById('nextBtn').textContent = 'Next';
+                currentStep = 2;
+            }
+        }
+
+        function downloadPDF() {
+            // Generate PDF quote
+            const quoteData = {
+                id: document.getElementById('quoteId').textContent,
+                customer: {
+                    name: document.getElementById('customerName').value,
+                    email: document.getElementById('customerEmail').value,
+                    phone: document.getElementById('customerPhone').value
+                },
+                quote: {
+                    type: document.getElementById('selectedType').textContent,
+                    quantity: document.getElementById('selectedQuantity').textContent,
+                    brand: document.getElementById('selectedBrand').textContent,
+                    material: document.getElementById('selectedMaterial').textContent,
+                    subtotal: document.getElementById('subtotal').textContent,
+                    installation: document.getElementById('installation').textContent,
+                    total: document.getElementById('total').textContent
+                }
+            };
+            
+            // Send to parent window for processing
+            window.parent.postMessage({
+                type: 'DOWNLOAD_PDF',
+                data: quoteData
+            }, '*');
+        }
+
+        function emailQuote() {
+            const customerEmail = document.getElementById('customerEmail').value;
+            if (!customerEmail) {
+                alert('Please enter your email address');
+                return;
+            }
+            
+            const quoteData = {
+                id: document.getElementById('quoteId').textContent,
+                customer: {
+                    name: document.getElementById('customerName').value,
+                    email: customerEmail,
+                    phone: document.getElementById('customerPhone').value
+                },
+                quote: {
+                    type: document.getElementById('selectedType').textContent,
+                    quantity: document.getElementById('selectedQuantity').textContent,
+                    brand: document.getElementById('selectedBrand').textContent,
+                    material: document.getElementById('selectedMaterial').textContent,
+                    subtotal: document.getElementById('subtotal').textContent,
+                    installation: document.getElementById('installation').textContent,
+                    total: document.getElementById('total').textContent
+                }
+            };
+            
+            // Send to parent window for processing
+            window.parent.postMessage({
+                type: 'EMAIL_QUOTE',
+                data: quoteData
+            }, '*');
+            
+            alert('Quote will be emailed to ' + customerEmail);
+        }
+
+        // Listen for messages from parent window
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'WIDGET_CONFIG') {
+                // Handle widget configuration
+                console.log('Widget configured:', event.data);
+            }
+        });
+
+        // Send ready message to parent
+        window.parent.postMessage({
+            type: 'WIDGET_READY',
+            widgetId: 'ai-window-estimator'
+        }, '*');
+    </script>
+</body>
+</html>
+

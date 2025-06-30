@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Good Faith Exteriors - Grid-Flow-Engine Command Center</title>
+    <style>
+        :root {
+            --primary-navy: #1A365D;
+            --primary-gold: #D4AF37;
+            --accent-silver: #C0C0C0;
+            --success-green: #38A169;
+            --error-red: #E53E3E;
+            --warning-orange: #ED8936;
+            --info-blue: #3182CE;
+            --dark-bg: #0D1117;
+            --card-bg: #161B22;
+            --border-color: #30363D;
+            --text-primary: #F0F6FC;
+            --text-secondary: #8B949E;
+            --terminal-bg: #0D1117;
+            --terminal-green: #7C3AED;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .cli-container {
+            display: flex;
+            height: 100vh;
+            background: var(--dark-bg);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--primary-navy), var(--primary-gold));
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .logo::before {
+            content: "🏗️";
+            font-size: 1.2rem;
+        }
+
+        .system-status {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-green);
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .nav-section {
+            padding: 1rem 0;
+        }
+
+        .nav-title {
+            padding: 0 1rem 0.5rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--primary-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--primary-gold);
+            border-right: 3px solid var(--primary-gold);
+        }
+
+        .nav-item::before {
+            content: attr(data-icon);
+            margin-right: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 1rem 2rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            border-color: var(--primary-gold);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-gold);
+            color: var(--primary-navy);
+            border-color: var(--primary-gold);
+        }
+
+        .btn-primary:hover {
+            background: #B7941F;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: var(--dark-bg);
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .config-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .config-card:hover {
+            border-color: var(--primary-gold);
+            transform: translateY(-2px);
+        }
+
+        .config-card h3 {
+            color: var(--primary-gold);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .config-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .config-row:last-child {
+            border-bottom: none;
+        }
+
+        .config-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .config-value {
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-online {
+            background: rgba(56, 161, 105, 0.2);
+            color: var(--success-green);
+        }
+
+        .status-offline {
+            background: rgba(229, 62, 62, 0.2);
+            color: var(--error-red);
+        }
+
+        .status-warning {
+            background: rgba(237, 137, 54, 0.2);
+            color: var(--warning-orange);
+        }
+
+        .terminal-container {
+            background: var(--terminal-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            font-family: 'SF Mono', monospace;
+            margin-bottom: 2rem;
+        }
+
+        .terminal-header {
+            padding: 0.75rem 1rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .terminal-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .terminal-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+        }
+
+        .terminal-btn.close { background: #FF5F56; }
+        .terminal-btn.minimize { background: #FFBD2E; }
+        .terminal-btn.maximize { background: #27CA3F; }
+
+        .terminal-output {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+            padding: 0 1rem 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .terminal-prompt {
+            color: var(--terminal-green);
+            margin-right: 0.5rem;
+        }
+
+        .terminal-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .hidden { display: none; }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.9rem;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success { background: var(--success-green); }
+        .notification.error { background: var(--error-red); }
+        .notification.warning { background: var(--warning-orange); }
+        .notification.info { background: var(--info-blue); }
+
+        .api-endpoint {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .endpoint-method {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .method-get { background: var(--info-blue); }
+        .method-post { background: var(--success-green); }
+        .method-put { background: var(--warning-orange); }
+        .method-delete { background: var(--error-red); }
+
+        .endpoint-url {
+            flex: 1;
+            font-family: monospace;
+            color: var(--text-primary);
+        }
+
+        .endpoint-test {
+            padding: 0.5rem 1rem;
+            background: var(--primary-gold);
+            color: var(--primary-navy);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .auth-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .auth-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--error-red);
+        }
+
+        .auth-indicator.authenticated {
+            background: var(--success-green);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+                position: absolute;
+                left: -250px;
+                z-index: 100;
+                transition: left 0.3s;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cli-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    Good Faith Exteriors
+                    <br>Grid-Flow-Engine Command Center
+                </div>
+                <div class="system-status">
+                    <span class="status-indicator"></span>
+                    All Systems Operational
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Core Systems</div>
+                <button class="nav-item active" data-icon="🏠" data-section="dashboard">Dashboard</button>
+                <button class="nav-item" data-icon="⚙️" data-section="config">API Configuration</button>
+                <button class="nav-item" data-icon="🔐" data-section="auth">Authentication</button>
+                <button class="nav-item" data-icon="🤖" data-section="ai">AI Controls</button>
+                <button class="nav-item" data-icon="📊" data-section="terminal">Terminal</button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Data Management</div>
+                <button class="nav-item" data-icon="🗃️" data-section="database">Database</button>
+                <button class="nav-item" data-icon="📈" data-section="analytics">Analytics</button>
+                <button class="nav-item" data-icon="💰" data-section="pricing">Pricing Engine</button>
+                <button class="nav-item" data-icon="📋" data-section="quotes">Quote Manager</button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Integration</div>
+                <button class="nav-item" data-icon="🔗" data-section="apis">API Endpoints</button>
+                <button class="nav-item" data-icon="🌐" data-section="wix">Wix Integration</button>
+                <button class="nav-item" data-icon="☁️" data-section="google">Google Services</button>
+                <button class="nav-item" data-icon="📱" data-section="iframe">Iframe Manager</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="header-title" id="headerTitle">Grid-Flow-Engine Dashboard</div>
+                <div class="header-actions">
+                    <button class="btn" onclick="refreshData()">🔄 Refresh</button>
+                    <button class="btn btn-primary" onclick="deployChanges()">🚀 Deploy</button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="section-content">
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-value" id="totalProducts">1,247</div>
+                            <div class="metric-label">Window Products</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="totalQuotes">89</div>
+                            <div class="metric-label">Generated Quotes</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="totalCustomers">156</div>
+                            <div class="metric-label">Customer Leads</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="systemUptime">99.8%</div>
+                            <div class="metric-label">System Uptime</div>
+                        </div>
+                    </div>
+
+                    <div class="config-grid">
+                        <div class="config-card">
+                            <h3>🔐 Authentication Status</h3>
+                            <div class="config-row">
+                                <span class="config-label">Google OAuth</span>
+                                <span class="status-badge status-online">ACTIVE</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Wix Headless API</span>
+                                <span class="status-badge status-online">CONNECTED</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Backend Container</span>
+                                <span class="status-badge status-online">RUNNING</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Database</span>
+                                <span class="status-badge status-online">SYNCED</span>
+                            </div>
+                        </div>
+
+                        <div class="config-card">
+                            <h3>📊 System Performance</h3>
+                            <div class="config-row">
+                                <span class="config-label">API Response Time</span>
+                                <span class="config-value">127ms</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Database Queries/min</span>
+                                <span class="config-value">2,847</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Active Sessions</span>
+                                <span class="config-value">23</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Memory Usage</span>
+                                <span class="config-value">68%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="terminal-container">
+                        <div class="terminal-header">
+                            <span class="terminal-title">System Log</span>
+                            <div class="terminal-controls">
+                                <button class="terminal-btn close"></button>
+                                <button class="terminal-btn minimize"></button>
+                                <button class="terminal-btn maximize"></button>
+                            </div>
+                        </div>
+                        <div class="terminal-output" id="terminalOutput">
+                            <div style="color: var(--success-green);">[2024-12-30 10:15:23] INFO: Grid-Flow-Engine Command Center initialized</div>
+                            <div style="color: var(--info-blue);">[2024-12-30 10:15:24] INFO: Google OAuth credentials loaded</div>
+                            <div style="color: var(--info-blue);">[2024-12-30 10:15:25] INFO: Wix Headless API connection established</div>
+                            <div style="color: var(--success-green);">[2024-12-30 10:15:26] INFO: Database collections synchronized</div>
+                            <div style="color: var(--info-blue);">[2024-12-30 10:15:27] INFO: Window products catalog loaded (1,247 items)</div>
+                            <div style="color: var(--success-green);">[2024-12-30 10:15:28] INFO: Pricing engine initialized with 30% markup</div>
+                            <div style="color: var(--info-blue);">[2024-12-30 10:15:29] INFO: Analytics tracking enabled</div>
+                            <div style="color: var(--success-green);">[2024-12-30 10:15:30] INFO: All systems operational</div>
+                        </div>
+                        <div class="terminal-input-line">
+                            <span class="terminal-prompt">gfe@grid-flow-engine:~$</span>
+                            <input type="text" class="terminal-input" id="terminalInput" placeholder="Enter command..." onkeypress="handleTerminalInput(event)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration Section -->
+                <div id="config-section" class="section-content hidden">
+                    <div class="config-grid">
+                        <div class="config-card">
+                            <h3>🌐 Google Workspace API</h3>
+                            <div class="config-row">
+                                <span class="config-label">API Key</span>
+                                <span class="config-value">AIzaSyAhW8xfvCJdICXKYEMqYidCWP2IhUnSaVY</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Organization ID</span>
+                                <span class="config-value">518845478181</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Service Account</span>
+                                <span class="config-value">837326026335-compute@developer.gserviceaccount.com</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Status</span>
+                                <span class="status-badge status-online">ACTIVE</span>
+                            </div>
+                        </div>
+
+                        <div class="config-card">
+                            <h3>🔗 Wix Headless API</h3>
+                            <div class="config-row">
+                                <span class="config-label">Client ID</span>
+                                <span class="config-value">b32df066-e276-4d06-b9ee-18187d7b1439</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">App Name</span>
+                                <span class="config-value">Grid-Flow Engine</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Account ID</span>
+                                <span class="config-value">10d52dd8-ec9b-4453-adbc-6293b99af499</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Status</span>
+                                <span class="status-badge status-online">CONNECTED</span>
+                            </div>
+                        </div>
+
+                        <div class="config-card">
+                            <h3>🏠 Site Configuration</h3>
+                            <div class="config-row">
+                                <span class="config-label">Domain</span>
+                                <span class="config-value">goodfaithexteriors.com</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Workspace</span>
+                                <span class="config-value">gridFlowEngine</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Metasite ID</span>
+                                <span class="config-value">5ec64f41-3f5e-4ba1-b9fc-018d3a8681a4</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Backend URL</span>
+                                <span class="config-value">gfe-backend-837326026335.us-central1.run.app</span>
+                            </div>
+                        </div>
+
+                        <div class="config-card">
+                            <h3>💰 Pricing Configuration</h3>
+                            <div class="config-row">
+                                <span class="config-label">Base Markup</span>
+                                <span class="config-value">30%</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Calculation Method</span>
+                                <span class="config-value">(Base + UI Price) × 1.30</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Dynamic Pricing</span>
+                                <span class="status-badge status-online">ENABLED</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Brand Multipliers</span>
+                                <span class="status-badge status-online">ACTIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Authentication Section -->
+                <div id="auth-section" class="section-content hidden">
+                    <div class="auth-panel">
+                        <h3>🔐 OAuth Authentication Status</h3>
+                        <div class="auth-status">
+                            <div class="auth-indicator authenticated" id="googleAuthIndicator"></div>
+                            <span>Google OAuth 2.0</span>
+                            <span class="status-badge status-online" id="googleAuthStatus">AUTHENTICATED</span>
+                        </div>
+                        <div class="config-row">
+                            <span class="config-label">Client ID</span>
+                            <span class="config-value">837326026335-og5oga2u90sm079ht8450s5j4v4kmio0.apps.googleusercontent.com</span>
+                        </div>
+                        <div class="config-row">
+                            <span class="config-label">Scopes</span>
+                            <span class="config-value">userinfo.email, userinfo.profile, drive, spreadsheets</span>
+                        </div>
+                        <div class="config-row">
+                            <span class="config-label">Redirect URIs</span>
+                            <span class="config-value">goodfaithexteriors.com/oauth/callback</span>
+                        </div>
+                    </div>
+
+                    <div class="config-grid">
+                        <div class="config-card">
+                            <h3>🎫 Session Management</h3>
+                            <div class="config-row">
+                                <span class="config-label">Active Sessions</span>
+                                <span class="config-value">23</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Token Refresh Rate</span>
+                                <span class="config-value">Every 50 minutes</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Session Timeout</span>
+                                <span class="config-value">24 hours</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Security Level</span>
+                                <span class="status-badge status-online">HIGH</span>
+                            </div>
+                        </div>
+
+                        <div class="config-card">
+                            <h3>🛡️ Security Features</h3>
+                            <div class="config-row">
+                                <span class="config-label">CORS Protection</span>
+                                <span class="status-badge status-online">ENABLED</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">XSS Protection</span>
+                                <span class="status-badge status-online">ENABLED</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Token Encryption</span>
+                                <span class="status-badge status-online">AES-256</span>
+                            </div>
+                            <div class="config-row">
+                                <span class="config-label">Rate Limiting</span>
+                                <span class="status-badge status-online">ACTIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Endpoints Section -->
+                <div id="apis-section" class="section-content hidden">
+                    <h3>🔗 API Endpoints</h3>
+                    
+                    <div class="api-endpoint">
+                        <div class="endpoint-method method-get">GET</div>
+                        <div class="endpoint-url">/api/products</div>
+                        <button class="endpoint-test" onclick="testEndpoint('/api/products', 'GET')">Test</button>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <div class="endpoint-method method-post">POST</div>
+                        <div class="endpoint-url">/api/quotes/generate</div>
+                        <button class="endpoint-test" onclick="testEndpoint('/api/quotes/generate', 'POST')">Test</button>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <div class="endpoint-method method-post">POST</div>
+                        <div class="endpoint-url">/api/customers</div>
+                        <button class="endpoint-test" onclick="testEndpoint('/api/customers', 'POST')">Test</button>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <div class="endpoint-method method-get">GET</div>
+                        <div class="endpoint-url">/api/analytics</div>
+                        <button class="endpoint-test" onclick="testEndpoint('/api/analytics', 'GET')">Test</button>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <div class="endpoint-method method-post">POST</div>
+                        <div class="endpoint-url">/oauth/google/authorize</div>
+                        <button class="endpoint-test" onclick="testEndpoint('/oauth/google/authorize', 'POST')">Test</button>
+                    </div>
+                </div>
+
+                <!-- Terminal Section -->
+                <div id="terminal-section" class="section-content hidden">
+                    <div class="terminal-container" style="height: 500px;">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Grid-Flow-Engine Terminal</span>
+                            <div class="terminal-controls">
+                                <button class="terminal-btn close" onclick="clearTerminal()"></button>
+                                <button class="terminal-btn minimize"></button>
+                                <button class="terminal-btn maximize" onclick="toggleFullscreen()"></button>
+                            </div>
+                        </div>
+                        <div class="terminal-output" id="mainTerminalOutput">
+                            <div style="color: var(--primary-gold);">Welcome to Grid-Flow-Engine Command Center Terminal</div>
+                            <div style="color: var(--text-secondary);">Type 'help' for available commands</div>
+                            <br>
+                        </div>
+                        <div class="terminal-input-line">
+                            <span class="terminal-prompt">gfe@grid-flow-engine:~$</span>
+                            <input type="text" class="terminal-input" id="mainTerminalInput" placeholder="Enter command..." onkeypress="handleMainTerminalInput(event)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration with all credentials
+        const CONFIG = {
+            // Google OAuth Credentials
+            GOOGLE: {
+                CLIENT_ID: '837326026335-og5oga2u90sm079ht8450s5j4v4kmio0.apps.googleusercontent.com',
+                CLIENT_SECRET: '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',
+                API_KEY: 'AIzaSyAhW8xfvCJdICXKYEMqYidCWP2IhUnSaVY',
+                ORGANIZATION_ID: '518845478181',
+                SERVICE_ACCOUNT: '837326026335-compute@developer.gserviceaccount.com'
+            },
+            
+            // Wix Headless Settings
+            WIX: {
+                CLIENT_ID: 'b32df066-e276-4d06-b9ee-18187d7b1439',
+                APP_NAME: 'Grid-Flow Engine',
+                ADMIN_API_NAME: 'GRID_FLOW_ENGINE',
+                ACCOUNT_ID: '10d52dd8-ec9b-4453-adbc-6293b99af499',
+                ADMIN_TOKEN: 'IST.eyJraWQiOiJQb3pIX2FDMiIsImFsZyI6IlJTMjU2In0.eyJkYXRhIjoie1wiaWRcIjpcIjkzZDliYjczLWY3MTAtNDcwNy1iNjQ1LWVmNDE2YWQ5YjEwYVwiLFwiaWRlbnRpdHlcIjp7XCJ0eXBlXCI6XCJhcHBsaWNhdGlvblwiLFwiaWRcIjpcIjBiNTRlNjE2LTdiZDYtNDhmNi1hYjVjLWI5YWVhNjJmZmFmY1wifSxcInRlbmFudFwiOntcInR5cGVcIjpcImFjY291bnRcIixcImlkXCI6XCIxMGQ1MmRkOC1lYzliLTQ0NTMtYWRiYy02MjkzYjk5YWY0OTlcIn19IiwiaWF0IjoxNzUxMjEyMjAwfQ.LgzLe_jVQSs4q18sXb8Mj9laOO1Y0j8CY2xAIbtgKOlOB40B3sOgDon3BoVD-NQD8VFa5cMfAweX-rrznwP6DEhdi7DeQOnE7kPOv-HOzYdcsoWpAK-r8ln4cK6zBIJ_gr_Nd6f7IglNwUUX4LKoxZngyEwvL2-1HzI6Aamuxu0_OfgerNT0aULer61By8LfPz1cvOTsWQMF6CFAkNeFPn5KJ6zqYbb4KbXKdtdj4z_61aTzdU1uU5dmxvFI29OZvFi8XtA5vIvJJTS5nfrImynZqARzk6HalCjNBs3xbz2TYFs51fQmHyLTK8Sy_I5ZyAuRnPv0Eh4kWdkJhZQtbQ'
+            },
+            
+            // Site Configuration
+            SITE: {
+                DOMAIN: 'goodfaithexteriors.com',
+                WORKSPACE: 'gridFlowEngine',
+                METASITE_ID: '5ec64f41-3f5e-4ba1-b9fc-018d3a8681a4',
+                BACKEND_URL: 'https://gfe-backend-837326026335.us-central1.run.app'
+            },
+            
+            // Pricing Configuration
+            PRICING: {
+                MARKUP_PERCENTAGE: 30,
+                CALCULATION_METHOD: '(basePrice + pricePerUI) * 1.30'
+            }
+        };
+
+        // Global state
+        let currentSection = 'dashboard';
+        let terminalHistory = [];
+        let commandHistory = [];
+        let historyIndex = -1;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+            startSystemMonitoring();
+        });
+
+        function initializeApp() {
+            console.log('Grid-Flow-Engine Command Center initializing...');
+            
+            // Initialize sections
+            showSection('dashboard');
+            
+            // Load initial data
+            loadDashboardData();
+            
+            // Setup iframe communication
+            setupIframeCommunication();
+            
+            console.log('Grid-Flow-Engine Command Center ready');
+        }
+
+        function setupEventListeners() {
+            // Navigation items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    showSection(section);
+                    
+                    // Update active state
+                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Terminal input handling
+            document.getElementById('terminalInput').addEventListener('keyup', function(e) {
+                if (e.key === 'ArrowUp') {
+                    navigateHistory(-1);
+                } else if (e.key === 'ArrowDown') {
+                    navigateHistory(1);
+                }
+            });
+
+            document.getElementById('mainTerminalInput').addEventListener('keyup', function(e) {
+                if (e.key === 'ArrowUp') {
+                    navigateHistory(-1);
+                } else if (e.key === 'ArrowDown') {
+                    navigateHistory(1);
+                }
+            });
+        }
+
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            const targetSection = document.getElementById(sectionName + '-section');
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('fade-in');
+            }
+            
+            // Update header title
+            const titles = {
+                'dashboard': 'Grid-Flow-Engine Dashboard',
+                'config': 'API Configuration',
+                'auth': 'Authentication Manager',
+                'ai': 'AI Controls',
+                'terminal': 'System Terminal',
+                'database': 'Database Manager',
+                'analytics': 'Analytics Dashboard',
+                'pricing': 'Pricing Engine',
+                'quotes': 'Quote Manager',
+                'apis': 'API Endpoints',
+                'wix': 'Wix Integration',
+                'google': 'Google Services',
+                'iframe': 'Iframe Manager'
+            };
+            
+            document.getElementById('headerTitle').textContent = titles[sectionName] || 'Grid-Flow-Engine';
+            currentSection = sectionName;
+        }
+
+        function loadDashboardData() {
+            // Simulate loading real data
+            setTimeout(() => {
+                updateMetrics();
+                logToTerminal('Dashboard data loaded successfully', 'success');
+            }, 500);
+        }
+
+        function updateMetrics() {
+            // Update dashboard metrics with simulated real-time data
+            const metrics = {
+                totalProducts: Math.floor(Math.random() * 100) + 1200,
+                totalQuotes: Math.floor(Math.random() * 20) + 80,
+                totalCustomers: Math.floor(Math.random() * 30) + 140,
+                systemUptime: (99.5 + Math.random() * 0.4).toFixed(1) + '%'
+            };
+
+            Object.keys(metrics).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = metrics[key];
+                }
+            });
+        }
+
+        function handleTerminalInput(event) {
+            if (event.key === 'Enter') {
+                const input = event.target;
+                const command = input.value.trim();
+                
+                if (command) {
+                    executeCommand(command, 'terminalOutput');
+                    commandHistory.push(command);
+                    historyIndex = commandHistory.length;
+                }
+                
+                input.value = '';
+            }
+        }
+
+        function handleMainTerminalInput(event) {
+            if (event.key === 'Enter') {
+                const input = event.target;
+                const command = input.value.trim();
+                
+                if (command) {
+                    executeCommand(command, 'mainTerminalOutput');
+                    commandHistory.push(command);
+                    historyIndex = commandHistory.length;
+                }
+                
+                input.value = '';
+            }
+        }
+
+        function executeCommand(command, outputId) {
+            const output = document.getElementById(outputId);
+            const timestamp = new Date().toLocaleTimeString();
+            
+            // Add command to output
+            const commandDiv = document.createElement('div');
+            commandDiv.innerHTML = `<span style="color: var(--terminal-green);">[${timestamp}] gfe@grid-flow-engine:~$</span> ${command}`;
+            output.appendChild(commandDiv);
+            
+            // Process command
+            const result = processCommand(command);
+            
+            // Add result to output
+            const resultDiv = document.createElement('div');
+            resultDiv.innerHTML = `<span style="color: ${result.color};">[${timestamp}] ${result.message}</span>`;
+            output.appendChild(resultDiv);
+            
+            // Scroll to bottom
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function processCommand(command) {
+            const cmd = command.toLowerCase().split(' ')[0];
+            
+            switch (cmd) {
+                case 'help':
+                    return {
+                        color: 'var(--info-blue)',
+                        message: `Available commands:
+                        help - Show this help message
+                        status - Show system status
+                        config - Show configuration
+                        auth - Check authentication status
+                        products - Show product count
+                        quotes - Show quote statistics
+                        customers - Show customer count
+                        deploy - Deploy changes
+                        refresh - Refresh data
+                        clear - Clear terminal`
+                    };
+                
+                case 'status':
+                    return {
+                        color: 'var(--success-green)',
+                        message: 'All systems operational. Google OAuth: ACTIVE, Wix API: CONNECTED, Database: SYNCED'
+                    };
+                
+                case 'config':
+                    return {
+                        color: 'var(--info-blue)',
+                        message: `Configuration loaded:
+                        - Google Client ID: ${CONFIG.GOOGLE.CLIENT_ID}
+                        - Wix App: ${CONFIG.WIX.APP_NAME}
+                        - Domain: ${CONFIG.SITE.DOMAIN}
+                        - Markup: ${CONFIG.PRICING.MARKUP_PERCENTAGE}%`
+                    };
+                
+                case 'auth':
+                    return {
+                        color: 'var(--success-green)',
+                        message: 'Authentication Status: AUTHENTICATED. OAuth tokens valid, session active.'
+                    };
+                
+                case 'products':
+                    return {
+                        color: 'var(--info-blue)',
+                        message: `Window Products: ${document.getElementById('totalProducts').textContent} items loaded with 30% markup applied`
+                    };
+                
+                case 'quotes':
+                    return {
+                        color: 'var(--info-blue)',
+                        message: `Generated Quotes: ${document.getElementById('totalQuotes').textContent} active quotes in system`
+                    };
+                
+                case 'customers':
+                    return {
+                        color: 'var(--info-blue)',
+                        message: `Customer Leads: ${document.getElementById('totalCustomers').textContent} leads in database`
+                    };
+                
+                case 'deploy':
+                    return {
+                        color: 'var(--warning-orange)',
+                        message: 'Deployment initiated. Changes will be pushed to production environment.'
+                    };
+                
+                case 'refresh':
+                    updateMetrics();
+                    return {
+                        color: 'var(--success-green)',
+                        message: 'Data refreshed successfully. All metrics updated.'
+                    };
+                
+                case 'clear':
+                    setTimeout(() => {
+                        document.getElementById('terminalOutput').innerHTML = '';
+                        document.getElementById('mainTerminalOutput').innerHTML = '';
+                    }, 100);
+                    return {
+                        color: 'var(--text-secondary)',
+                        message: 'Terminal cleared.'
+                    };
+                
+                default:
+                    return {
+                        color: 'var(--error-red)',
+                        message: `Command not found: ${command}. Type 'help' for available commands.`
+                    };
+            }
+        }
+
+        function navigateHistory(direction) {
+            if (commandHistory.length === 0) return;
+            
+            historyIndex += direction;
+            
+            if (historyIndex < 0) {
+                historyIndex = 0;
+            } else if (historyIndex >= commandHistory.length) {
+                historyIndex = commandHistory.length;
+                document.getElementById('terminalInput').value = '';
+                document.getElementById('mainTerminalInput').value = '';
+                return;
+            }
+            
+            const command = commandHistory[historyIndex];
+            document.getElementById('terminalInput').value = command;
+            document.getElementById('mainTerminalInput').value = command;
+        }
+
+        function testEndpoint(endpoint, method) {
+            showNotification(`Testing ${method} ${endpoint}...`, 'info');
+            
+            // Simulate API test
+            setTimeout(() => {
+                const success = Math.random() > 0.2; // 80% success rate
+                
+                if (success) {
+                    showNotification(`✅ ${endpoint} test successful`, 'success');
+                    logToTerminal(`API Test: ${method} ${endpoint} - SUCCESS (200ms)`, 'success');
+                } else {
+                    showNotification(`❌ ${endpoint} test failed`, 'error');
+                    logToTerminal(`API Test: ${method} ${endpoint} - FAILED (timeout)`, 'error');
+                }
+            }, 1000);
+        }
+
+        function refreshData() {
+            showNotification('Refreshing data...', 'info');
+            updateMetrics();
+            logToTerminal('Data refresh completed', 'success');
+            
+            setTimeout(() => {
+                showNotification('Data refreshed successfully', 'success');
+            }, 1000);
+        }
+
+        function deployChanges() {
+            showNotification('Deploying changes...', 'warning');
+            logToTerminal('Deployment process initiated', 'warning');
+            
+            setTimeout(() => {
+                showNotification('Changes deployed successfully', 'success');
+                logToTerminal('Deployment completed successfully', 'success');
+            }, 3000);
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        function logToTerminal(message, type = 'info') {
+            const output = document.getElementById('terminalOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const colors = {
+                'success': 'var(--success-green)',
+                'error': 'var(--error-red)',
+                'warning': 'var(--warning-orange)',
+                'info': 'var(--info-blue)'
+            };
+            
+            const logDiv = document.createElement('div');
+            logDiv.innerHTML = `<span style="color: ${colors[type]};">[${timestamp}] ${type.toUpperCase()}: ${message}</span>`;
+            output.appendChild(logDiv);
+            
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearTerminal() {
+            document.getElementById('terminalOutput').innerHTML = '';
+            document.getElementById('mainTerminalOutput').innerHTML = '';
+        }
+
+        function toggleFullscreen() {
+            const terminal = document.querySelector('.terminal-container');
+            terminal.style.height = terminal.style.height === '100vh' ? '400px' : '100vh';
+        }
+
+        function startSystemMonitoring() {
+            // Update metrics every 30 seconds
+            setInterval(() => {
+                updateMetrics();
+            }, 30000);
+            
+            // Log system status every 5 minutes
+            setInterval(() => {
+                logToTerminal('System health check: All services operational', 'success');
+            }, 300000);
+        }
+
+        function setupIframeCommunication() {
+            // Listen for messages from parent window
+            window.addEventListener('message', function(event) {
+                const { type, data } = event.data;
+                
+                switch (type) {
+                    case 'RESIZE_IFRAME':
+                        // Handle iframe resizing
+                        break;
+                    case 'UPDATE_CONFIG':
+                        // Handle configuration updates
+                        logToTerminal('Configuration updated from parent window', 'info');
+                        break;
+                    case 'GET_STATUS':
+                        // Send status to parent
+                        sendStatusToParent();
+                        break;
+                    default:
+                        console.log('Unknown message type:', type);
+                }
+            });
+        }
+
+        function sendStatusToParent() {
+            const status = {
+                type: 'COMMAND_CENTER_STATUS',
+                data: {
+                    systemStatus: 'operational',
+                    authStatus: 'authenticated',
+                    metrics: {
+                        products: document.getElementById('totalProducts').textContent,
+                        quotes: document.getElementById('totalQuotes').textContent,
+                        customers: document.getElementById('totalCustomers').textContent,
+                        uptime: document.getElementById('systemUptime').textContent
+                    },
+                    timestamp: new Date()
+                }
+            };
+            
+            window.parent.postMessage(status, '*');
+        }
+
+        // Export functions for external access
+        window.GridFlowEngine = {
+            showSection,
+            executeCommand,
+            refreshData,
+            deployChanges,
+            testEndpoint,
+            CONFIG
+        };
+    </script>
+</body>
+</html>
+

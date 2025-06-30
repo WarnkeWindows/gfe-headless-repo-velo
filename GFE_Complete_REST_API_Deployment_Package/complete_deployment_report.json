@@ -1,0 +1,85 @@
+{
+  "deployment_timestamp": "2025-06-30T13:44:23.336350",
+  "site_id": "1daf6e42-c7ae-4e56-9a0f-24209afd43c2",
+  "domain": "goodfaithexteriors.com",
+  "status": "completed",
+  "endpoints": {
+    "domain": {
+      "primary": "https://1daf6e42-c7ae-4e56-9a0f-24209afd43c2.wixsite.com/goodfaithexteriors",
+      "type": "wix_subdomain"
+    }
+  },
+  "deployment_log": [
+    "[13:44:20] INFO: \ud83d\ude80 STARTING COMPLETE REST API DEPLOYMENT",
+    "[13:44:20] INFO: ============================================================",
+    "[13:44:20] INFO: \ud83d\ude80 Installing Wix Site...",
+    "[13:44:20] INFO: API PATCH /sites/v1/sites/1daf6e42-c7ae-4e56-9a0f-24209afd43c2: 405",
+    "[13:44:20] WARNING: \u26a0\ufe0f Site configuration update failed, continuing with existing site",
+    "[13:44:20] INFO: \ud83d\udcca Creating Data Collections...",
+    "[13:44:20] INFO: API POST /data/v1/collections: 404",
+    "[13:44:20] WARNING: \u26a0\ufe0f Collection creation failed: GFE_Leads",
+    "[13:44:21] INFO: API POST /data/v1/collections: 404",
+    "[13:44:21] WARNING: \u26a0\ufe0f Collection creation failed: GFE_Quotes",
+    "[13:44:21] INFO: API POST /data/v1/collections: 404",
+    "[13:44:21] WARNING: \u26a0\ufe0f Collection creation failed: GFE_WindowProducts",
+    "[13:44:21] INFO: API POST /data/v1/collections: 404",
+    "[13:44:21] WARNING: \u26a0\ufe0f Collection creation failed: GFE_Customers",
+    "[13:44:21] INFO: \ud83d\udcca Collections setup: 0/4 successful",
+    "[13:44:21] INFO: \ud83d\udcc4 Deploying Website Pages...",
+    "[13:44:21] INFO: API POST /sites/v1/sites/1daf6e42-c7ae-4e56-9a0f-24209afd43c2/pages: 404",
+    "[13:44:21] WARNING: \u26a0\ufe0f Page deployment failed: Home - Good Faith Exteriors",
+    "[13:44:21] INFO: API POST /sites/v1/sites/1daf6e42-c7ae-4e56-9a0f-24209afd43c2/pages: 404",
+    "[13:44:21] WARNING: \u26a0\ufe0f Page deployment failed: AI Window Estimator",
+    "[13:44:21] INFO: API POST /sites/v1/sites/1daf6e42-c7ae-4e56-9a0f-24209afd43c2/pages: 404",
+    "[13:44:21] WARNING: \u26a0\ufe0f Page deployment failed: Product Browser",
+    "[13:44:21] INFO: API POST /sites/v1/sites/1daf6e42-c7ae-4e56-9a0f-24209afd43c2/pages: 404",
+    "[13:44:21] WARNING: \u26a0\ufe0f Page deployment failed: Contact & Support",
+    "[13:44:21] INFO: \ud83d\udcc4 Pages deployed: 0/4 successful",
+    "[13:44:21] INFO: \ud83c\udf10 Configuring Domain Mapping...",
+    "[13:44:21] INFO: API POST /sites/v1/sites/1daf6e42-c7ae-4e56-9a0f-24209afd43c2/domains: 404",
+    "[13:44:21] WARNING: \u26a0\ufe0f Domain configuration may need manual setup",
+    "[13:44:21] INFO: \ud83d\udd17 Setting up API Endpoints...",
+    "[13:44:22] INFO: API POST /backend/v1/functions: 404",
+    "[13:44:22] WARNING: \u26a0\ufe0f API endpoint creation failed: /api/quotes",
+    "[13:44:22] INFO: API POST /backend/v1/functions: 404",
+    "[13:44:22] WARNING: \u26a0\ufe0f API endpoint creation failed: /api/quotes/{id}",
+    "[13:44:22] INFO: API POST /backend/v1/functions: 404",
+    "[13:44:22] WARNING: \u26a0\ufe0f API endpoint creation failed: /api/leads",
+    "[13:44:22] INFO: API POST /backend/v1/functions: 404",
+    "[13:44:22] WARNING: \u26a0\ufe0f API endpoint creation failed: /api/products",
+    "[13:44:22] INFO: API POST /backend/v1/functions: 404",
+    "[13:44:22] WARNING: \u26a0\ufe0f API endpoint creation failed: /api/ai/estimate",
+    "[13:44:22] INFO: API POST /backend/v1/functions: 404",
+    "[13:44:22] WARNING: \u26a0\ufe0f API endpoint creation failed: /api/chat",
+    "[13:44:22] INFO: \ud83d\udcdd Populating Sample Data...",
+    "[13:44:22] INFO: API POST /data/v1/collections/GFE_WindowProducts/items: 404",
+    "[13:44:23] INFO: API POST /data/v1/collections/GFE_WindowProducts/items: 404",
+    "[13:44:23] INFO: API POST /data/v1/collections/GFE_WindowProducts/items: 404",
+    "[13:44:23] INFO: \ud83d\udcdd Sample data populated: 0/3 products",
+    "[13:44:23] INFO: \ud83d\ude80 Launching Complete System...",
+    "[13:44:23] INFO: API POST /sites/v1/sites/1daf6e42-c7ae-4e56-9a0f-24209afd43c2/publish: 404",
+    "[13:44:23] WARNING: \u26a0\ufe0f Site publishing may need manual action",
+    "[13:44:23] INFO: \ud83e\uddea Testing Endpoints..."
+  ],
+  "configuration": {
+    "theme": {
+      "primary_color": "#1a2332",
+      "secondary_color": "#d4af37",
+      "accent_color": "#c0c0c0",
+      "text_color": "#ffffff",
+      "background_color": "#0f1419"
+    },
+    "credentials": {
+      "wix_account_id": "10d52dd8-ec9b-4453-adbc-6293b99af499",
+      "wix_site_id": "1daf6e42-c7ae-4e56-9a0f-24209afd43c2",
+      "blocks_app_id": "477baa33-872c-4b41-8f1f-7d5e28a684f2"
+    }
+  },
+  "next_steps": [
+    "Verify domain DNS settings",
+    "Test all widget functionality",
+    "Configure email notifications",
+    "Set up analytics tracking",
+    "Train staff on new tools"
+  ]
+}

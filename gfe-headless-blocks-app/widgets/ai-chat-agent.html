@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Agent - Good Faith Exteriors</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a2332 0%, #0f1419 100%);
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: rgba(26, 35, 50, 0.9);
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chat-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-logo img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .chat-title {
+            flex: 1;
+        }
+
+        .chat-title h2 {
+            color: #d4af37;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-subtitle {
+            color: #c0c0c0;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .message.ai .message-avatar {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #1a2332;
+        }
+
+        .message.user .message-avatar {
+            background: rgba(192, 192, 192, 0.2);
+            color: #c0c0c0;
+        }
+
+        .message-content {
+            max-width: 70%;
+            background: rgba(26, 35, 50, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+
+        .message-text {
+            color: #ffffff;
+            line-height: 1.5;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            color: #c0c0c0;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #d4af37;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .chat-input-container {
+            background: rgba(26, 35, 50, 0.9);
+            border-top: 2px solid rgba(212, 175, 55, 0.3);
+            padding: 1rem 1.5rem;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(15, 20, 25, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            color: #ffffff;
+            font-size: 1rem;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .chat-input::placeholder {
+            color: #888;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #1a2332;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .send-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-action {
+            background: rgba(26, 35, 50, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            color: #d4af37;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: #d4af37;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 2rem;
+            color: #c0c0c0;
+        }
+
+        .welcome-title {
+            color: #d4af37;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-text {
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .suggested-questions {
+            display: grid;
+            gap: 0.75rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .suggested-question {
+            background: rgba(26, 35, 50, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .suggested-question:hover {
+            border-color: #d4af37;
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .question-title {
+            color: #d4af37;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-preview {
+            color: #c0c0c0;
+            font-size: 0.9rem;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(15, 20, 25, 0.5);
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(212, 175, 55, 0.3);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(212, 175, 55, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .chat-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .chat-messages {
+                padding: 0.75rem;
+            }
+
+            .chat-input-container {
+                padding: 0.75rem 1rem;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-header">
+        <div class="chat-logo">
+            <img src="https://static.wixstatic.com/media/10d52d_91ba6fdf18634b31b4ebedf5f0f7f8d3~mv2.png" alt="AI Assistant">
+        </div>
+        <div class="chat-title">
+            <h2>AI Assistant</h2>
+            <div class="chat-subtitle">Good Faith Exteriors Support</div>
+        </div>
+        <div class="status-indicator"></div>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message" id="welcomeMessage">
+                <h3 class="welcome-title">👋 Welcome to Good Faith Exteriors!</h3>
+                <p class="welcome-text">
+                    I'm your AI assistant, here to help you with window and door questions, 
+                    quotes, scheduling, and more. How can I assist you today?
+                </p>
+                
+                <div class="suggested-questions">
+                    <div class="suggested-question" onclick="askQuestion('What types of windows do you offer?')">
+                        <div class="question-title">🪟 Window Options</div>
+                        <div class="question-preview">Learn about our window styles and brands</div>
+                    </div>
+                    <div class="suggested-question" onclick="askQuestion('How do I get a quote?')">
+                        <div class="question-title">💰 Get a Quote</div>
+                        <div class="question-preview">Start your free window estimate</div>
+                    </div>
+                    <div class="suggested-question" onclick="askQuestion('What is your installation process?')">
+                        <div class="question-title">🔧 Installation</div>
+                        <div class="question-preview">Learn about our installation process</div>
+                    </div>
+                    <div class="suggested-question" onclick="askQuestion('Do you offer financing?')">
+                        <div class="question-title">💳 Financing</div>
+                        <div class="question-preview">Explore financing options</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-avatar">
+                    <span>🤖</span>
+                </div>
+                <span>AI is typing</span>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="quick-actions" id="quickActions" style="display: none;">
+                <div class="quick-action" onclick="askQuestion('Schedule consultation')">📅 Schedule</div>
+                <div class="quick-action" onclick="askQuestion('Get quote')">💰 Quote</div>
+                <div class="quick-action" onclick="askQuestion('View products')">🪟 Products</div>
+                <div class="quick-action" onclick="askQuestion('Contact info')">📞 Contact</div>
+            </div>
+            
+            <div class="chat-input-wrapper">
+                <textarea 
+                    class="chat-input" 
+                    id="chatInput" 
+                    placeholder="Type your message here..."
+                    rows="1"
+                ></textarea>
+                <button class="send-button" id="sendButton" onclick="sendMessage()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let conversationHistory = [];
+        let isTyping = false;
+
+        // AI responses database
+        const aiResponses = {
+            "window types": "We offer a wide variety of window styles including:\n\n🪟 **Casement Windows** - Side-hinged for maximum ventilation\n🪟 **Double-Hung Windows** - Classic style with two movable sashes\n🪟 **Awning Windows** - Top-hinged for weather protection\n🪟 **Slider Windows** - Horizontal sliding operation\n🪟 **Bay Windows** - Projecting windows for extra space\n🪟 **Picture Windows** - Fixed glass for maximum views\n\nWe carry premium brands like Andersen, Marvin, Pella, Provia, Windsor, and Thermo-Tech. Would you like to see our product browser or get a quote?",
+            
+            "quote": "Getting a quote is easy! We have several options:\n\n💰 **AI Window Estimator** - Upload photos for instant AI analysis\n💰 **Good Faith Estimator** - Step-by-step traditional estimation\n💰 **AI Window Measure** - Precise measurements using AI\n\nAll our quotes include:\n✅ Real products from top brands\n✅ Accurate pricing\n✅ Installation costs\n✅ No sales pressure\n\nWould you like me to open one of our estimation tools for you?",
+            
+            "installation": "Our installation process is designed for your peace of mind:\n\n🔧 **Step 1:** Free in-home consultation and measurement\n🔧 **Step 2:** Custom manufacturing (2-4 weeks)\n🔧 **Step 3:** Professional installation by certified technicians\n🔧 **Step 4:** Final inspection and cleanup\n🔧 **Step 5:** Warranty registration and follow-up\n\n**What sets us apart:**\n✅ Licensed and insured professionals\n✅ Lifetime warranty on installation\n✅ Complete cleanup included\n✅ Local Long Island company\n\nWould you like to schedule a free consultation?",
+            
+            "financing": "We offer flexible financing options to make your project affordable:\n\n💳 **0% Interest** - 12 months same as cash\n💳 **Low Monthly Payments** - Extended terms available\n💳 **Quick Approval** - Decision in minutes\n💳 **No Prepayment Penalty** - Pay off early without fees\n\n**Qualification is easy:**\n✅ Quick online application\n✅ Soft credit check initially\n✅ Multiple payment options\n✅ Competitive rates\n\nWould you like me to help you explore financing options or get a quote first?",
+            
+            "contact": "Here's how to reach Good Faith Exteriors:\n\n📞 **Phone:** 631-416-669\n📧 **Email:** info@goodfaithexteriors.com\n🌐 **Website:** goodfaithexteriors.com\n📍 **Service Area:** Long Island, NY\n\n**Business Hours:**\n🕐 Monday-Friday: 8 AM - 6 PM\n🕐 Saturday: 9 AM - 4 PM\n🕐 Sunday: By appointment\n\n**Emergency Service:** Available 24/7\n\nWould you like me to help you schedule a consultation or get a quote?",
+            
+            "schedule": "I'd be happy to help you schedule a consultation! Here's what we offer:\n\n📅 **Free In-Home Consultation**\n- No obligation estimate\n- Professional measurement\n- Product recommendations\n- Financing discussion\n\n📅 **Virtual Consultation**\n- Video call with our experts\n- Photo-based estimates\n- Product selection help\n\n**Available Times:**\n🕐 Weekdays: 9 AM - 5 PM\n🕐 Saturdays: 10 AM - 3 PM\n🕐 Evenings: By special request\n\nWould you like me to open our scheduling tool or would you prefer to call us directly at 631-416-669?",
+            
+            "products": "Browse our complete product catalog! We feature:\n\n🏭 **Premium Brands:**\n- Andersen (Premium wood and composite)\n- Marvin (Luxury wood and fiberglass)\n- Pella (Innovative designs and materials)\n- Provia (Value and performance)\n- Windsor (Classic styling)\n- Thermo-Tech (Energy efficiency)\n\n🪟 **Product Categories:**\n- Replacement Windows\n- New Construction Windows\n- Patio Doors\n- Entry Doors\n- Storm Doors\n\nWould you like me to open our Product Browser so you can explore our full catalog?",
+            
+            "default": "I'm here to help with any questions about windows, doors, quotes, scheduling, or our services! \n\nSome things I can help you with:\n🪟 Window and door information\n💰 Getting quotes and estimates\n📅 Scheduling consultations\n🔧 Installation process\n💳 Financing options\n📞 Contact information\n\nWhat would you like to know more about?"
+        };
+
+        // Initialize chat
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            autoResizeTextarea();
+        });
+
+        function setupEventListeners() {
+            const chatInput = document.getElementById('chatInput');
+            const sendButton = document.getElementById('sendButton');
+
+            // Enter key to send message
+            chatInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Auto-resize textarea
+            chatInput.addEventListener('input', autoResizeTextarea);
+
+            // Enable/disable send button based on input
+            chatInput.addEventListener('input', function() {
+                sendButton.disabled = !this.value.trim();
+            });
+        }
+
+        function autoResizeTextarea() {
+            const textarea = document.getElementById('chatInput');
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message || isTyping) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            
+            // Clear input
+            input.value = '';
+            autoResizeTextarea();
+            
+            // Hide welcome message and show quick actions
+            hideWelcomeMessage();
+            
+            // Generate AI response
+            generateAIResponse(message);
+        }
+
+        function askQuestion(question) {
+            document.getElementById('chatInput').value = question;
+            sendMessage();
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.innerHTML = sender === 'ai' ? '🤖' : '👤';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            const messageText = document.createElement('div');
+            messageText.className = 'message-text';
+            messageText.innerHTML = formatMessage(text);
+            
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            content.appendChild(messageText);
+            content.appendChild(messageTime);
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+            
+            // Store in conversation history
+            conversationHistory.push({
+                text: text,
+                sender: sender,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        function formatMessage(text) {
+            // Convert markdown-style formatting to HTML
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function generateAIResponse(userMessage) {
+            showTypingIndicator();
+            
+            // Simulate thinking time
+            setTimeout(() => {
+                const response = getAIResponse(userMessage);
+                hideTypingIndicator();
+                addMessage(response, 'ai');
+                
+                // Check if response suggests opening a tool
+                checkForToolSuggestions(response, userMessage);
+            }, 1500 + Math.random() * 1000);
+        }
+
+        function getAIResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // Check for specific keywords and return appropriate response
+            if (lowerMessage.includes('window') && (lowerMessage.includes('type') || lowerMessage.includes('style') || lowerMessage.includes('offer'))) {
+                return aiResponses["window types"];
+            } else if (lowerMessage.includes('quote') || lowerMessage.includes('estimate') || lowerMessage.includes('price') || lowerMessage.includes('cost')) {
+                return aiResponses["quote"];
+            } else if (lowerMessage.includes('install') || lowerMessage.includes('process')) {
+                return aiResponses["installation"];
+            } else if (lowerMessage.includes('financ') || lowerMessage.includes('payment') || lowerMessage.includes('loan')) {
+                return aiResponses["financing"];
+            } else if (lowerMessage.includes('contact') || lowerMessage.includes('phone') || lowerMessage.includes('call') || lowerMessage.includes('reach')) {
+                return aiResponses["contact"];
+            } else if (lowerMessage.includes('schedule') || lowerMessage.includes('appointment') || lowerMessage.includes('consultation') || lowerMessage.includes('visit')) {
+                return aiResponses["schedule"];
+            } else if (lowerMessage.includes('product') || lowerMessage.includes('catalog') || lowerMessage.includes('browse') || lowerMessage.includes('brand')) {
+                return aiResponses["products"];
+            } else {
+                return aiResponses["default"];
+            }
+        }
+
+        function checkForToolSuggestions(response, userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+            
+            // Auto-open tools based on user intent
+            if (lowerMessage.includes('quote') || lowerMessage.includes('estimate')) {
+                setTimeout(() => {
+                    addMessage("Would you like me to open our AI Window Estimator for you? It can give you an instant quote!", 'ai');
+                    setTimeout(() => {
+                        addToolButton('Open AI Estimator', 'ai-window-estimator');
+                    }, 500);
+                }, 2000);
+            } else if (lowerMessage.includes('product') || lowerMessage.includes('browse')) {
+                setTimeout(() => {
+                    addMessage("I can open our Product Browser so you can explore our full catalog. Would you like that?", 'ai');
+                    setTimeout(() => {
+                        addToolButton('Open Product Browser', 'product-browser');
+                    }, 500);
+                }, 2000);
+            } else if (lowerMessage.includes('schedule') || lowerMessage.includes('appointment')) {
+                setTimeout(() => {
+                    addMessage("I can help you schedule a consultation right now. Would you like me to open our scheduling tool?", 'ai');
+                    setTimeout(() => {
+                        addToolButton('Open Scheduler', 'appointment-scheduler');
+                    }, 500);
+                }, 2000);
+            }
+        }
+
+        function addToolButton(buttonText, toolId) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const buttonDiv = document.createElement('div');
+            buttonDiv.className = 'message ai';
+            buttonDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <button class="btn-primary" onclick="openTool('${toolId}')" style="width: 100%; margin: 0; padding: 0.75rem 1rem;">
+                        ${buttonText}
+                    </button>
+                </div>
+            `;
+            messagesContainer.appendChild(buttonDiv);
+            scrollToBottom();
+        }
+
+        function openTool(toolId) {
+            // Send message to parent window to open the specified tool
+            window.parent.postMessage({
+                type: 'OPEN_WIDGET',
+                widgetId: toolId,
+                source: 'ai-chat'
+            }, '*');
+            
+            addMessage(`Opening ${toolId.replace('-', ' ')}...`, 'ai');
+        }
+
+        function showTypingIndicator() {
+            isTyping = true;
+            document.getElementById('typingIndicator').style.display = 'flex';
+            scrollToBottom();
+        }
+
+        function hideTypingIndicator() {
+            isTyping = false;
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        function hideWelcomeMessage() {
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            const quickActions = document.getElementById('quickActions');
+            
+            if (welcomeMessage) {
+                welcomeMessage.style.display = 'none';
+                quickActions.style.display = 'flex';
+            }
+        }
+
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Listen for messages from parent window
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'WIDGET_CONFIG') {
+                console.log('AI Chat widget configured:', event.data);
+            } else if (event.data.type === 'USER_ACTION') {
+                // Handle user actions from other widgets
+                const action = event.data.action;
+                addMessage(`I see you ${action}. How can I help you with that?`, 'ai');
+            }
+        });
+
+        // Send ready message to parent
+        window.parent.postMessage({
+            type: 'WIDGET_READY',
+            widgetId: 'ai-chat-agent'
+        }, '*');
+
+        // Auto-focus input when widget loads
+        setTimeout(() => {
+            document.getElementById('chatInput').focus();
+        }, 500);
+    </script>
+</body>
+</html>
+
